@@ -1,13 +1,11 @@
 #!/bin/bash
-
-export CONTAINERD_CONFIG_FILE_PATH="/etc/containerd/config.toml"
-
+# 此命令用于生成containerd默认的配置文件
 # containerd config default | tee /etc/containerd/config.toml
 
 # 添加ctr加速
-# 匹配第一个匹配到的config_path行. 并替换为config_path = /etc/containerd/certs.d
-sed -i '0,/config_path = ""/{s#config_path = ""#config_path = "/etc/containerd/certs.d"#}' $CONTAINERD_CONFIG_FILE_PATH
-grep -nE "config_path" /etc/containerd/config.toml
+export CONTAINERD_CONFIG_FILE_PATH="/etc/containerd/config.toml"
+sed -i '/\[plugins\."io\.containerd\.grpc\.v1\.cri"\.registry\]/!b;n;s/config_path = .*/config_path = "\/etc\/containerd\/certs.d"/' /etc/containerd/config.toml
+cat -n /etc/containerd/config.toml | grep -A 1 "\[plugins\.\"io\.containerd\.grpc\.v1\.cri\"\.registry\]"
 
 # docker hub镜像加速
 mkdir -p /etc/containerd/certs.d/docker.io
