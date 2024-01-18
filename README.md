@@ -1,5 +1,8 @@
 # Kubernetes Deploy
 
+## 阶段
+目前处在`PRE`初始阶段, 正在快速迭代, 仅在本机MAC环境的aarch64的Ubuntu2.04的虚拟机上测试运行
+
 ## 介绍
 该仓库旨在快速在Ubuntu一键部署创建一个全新的一个单节点的控制平面
 
@@ -19,6 +22,9 @@
 
 ### Worknode 工作节点
 执行`01-base`和`02-containerd`脚本和`03-install-worknode-kubernetes.sh`文件, 把在部署Master节点输出的Token进行复制, 即可加入集群
+
+## 局限性
+1. 目前仅在Ubuntu22.04上进行开发和测试
 
 ## 资料
 1. https://kubernetes.io/docs/tasks/tools/install-kubectl-linux/
