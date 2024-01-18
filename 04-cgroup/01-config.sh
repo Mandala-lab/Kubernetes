@@ -14,13 +14,8 @@ if [ "$filesystem_type" != "cgroup2fs" ]; then
    sudo grubby \
      --update-kernel=ALL \
      --args="systemd.unified_cgroup_hierarchy=1"
+     sudo reboot
 fi
-
-# 如果文件系统类型为 cgroup2fs，执行后续操作
-echo "文件系统类型为 cgroup2fs，执行后续操作。"
-
-# 手动重启
-sudo reboot
 
 # 重启containerd
 sudo systemctl restart containerd
