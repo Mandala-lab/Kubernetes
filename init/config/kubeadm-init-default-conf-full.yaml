@@ -94,6 +94,7 @@ clusterName: "example-cluster"
 ---
 apiVersion: kubelet.config.k8s.io/v1beta1
 kind: KubeletConfiguration
+cgroupDriver: systemd # 默认值为cgroupfs
 # kubelet specific options here
 ---
 apiVersion: kubeproxy.config.k8s.io/v1alpha1

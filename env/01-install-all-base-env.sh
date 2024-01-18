@@ -58,7 +58,7 @@ ntpdate time.windows.com
 # runc 是操作系统级别的软件包, 用于与Containerd Docker Podman等CRI底层的OCI工具
 # Containerd -> runc
 # 少数情况下, 系统可能没有安装runc或者配置不正确
-# 二进制:
+# TODO 切换为动态获取
 VERSION="v1.1.11"
 
 ARCH=""
@@ -101,48 +101,40 @@ systemctl restart systemd-resolved
 sudo setenforce 0 # 临时禁用, 重启变回
 sudo sed -i 's/^SELINUX=enforcing$/SELINUX=permissive/' /etc/selinux/config # 禁用
 
-# SWAP分区,
+# SWAP分区
 # kubelet 的默认行为是: 如果在节点上检测到交换内存，则无法启动。自 v1.22 起支持 Swap。
 # 从 v1.28 开始，只有 `cgroup v2` 支持 Swap
 # kubelet 的 NodeSwap 特性门控是 beta 版，但默认处于禁用状态, 允许 kubelet 在节点上使用 swap
-#
 sed -i '/^\/.*swap/s/^/#/' /etc/fstab
 sudo mount -a
 sudo swapoff -a
 cat /etc/fstab
 grep swap /etc/fstab
-# sleep 4
+
 # 检查是否存在swap分区
 sudo blkid | grep swap
-# sleep 4
-# 执行命令并获取输出
-#result=$(cat /proc/swaps)
-## 判断输出是否为0，如果不是则退出
-#if [ "$result" -ne 0 ]; then
-#    echo "Swap 存在，退出脚本"
-#    exit 1
-#fi
-## 如果输出为0，则继续执行脚本的其他部分
-#echo "Swap 不存在，继续执行脚本"
-# free -m
 
-# 创建/etc/sysctl.d/99-kubernetes-cri.conf配置文件
-# cilium不需要
-# 在文件名/etc/sysctl.d/99-kubernetes-cri.conf中，“99” 代表文件的优先级或顺序。
+# https://kubernetes.io/zh-cn/docs/setup/production-environment/container-runtimes/
+# 使用kubeadm加入Kubernetes集群时要求net.bridge.bridge-nf-call-iptables=1参数值, 因为Kubernetes默认行为是依赖IPTables这个库
+# 如果集群使用了IPv6, 则还需要net.bridge.bridge-nf-call-ip6tables=1这个参数值
+# 使用kubeadm创建Kubernetes集群时默认要求net.ipv4.ip_forward = 1
+# 如果选择的CNI组件是cilium则不需要下面这些参数
+# 在文件名/etc/sysctl.d/99-kubernetes-cri.conf中，`99`代表文件的优先级或顺序。
 # sysctl是Linux内核参数的配置工具，它可以通过修改/proc/sys/目录下的文件来设置内核参数。
 # 在/etc/sysctl.d/目录中，可以放置一系列的配置文件，以便在系统启动时自动加载这些参数。
 # 这些配置文件按照文件名的字母顺序逐个加载。数字前缀用于指定加载的顺序，较小的数字表示较高的优先
 # 参数说明:
-# 启用控制 IPv4 数据包经过桥接时是否要经过 iptables 过滤
-# 启用控制 IPv6 数据包经过桥接时是否要经过 ip6tables 过滤
-# 启用 IPv4 数据包的转发功能
+# net.bridge.bridge-nf-call-iptables  : 启用控制 IPv4 数据包经过桥接时是否要经过 iptables 过滤
+# net.bridge.bridge-nf-call-ip6tables : 启用控制 IPv6 数据包经过桥接时是否要经过 ip6tables 过滤
+# net.ipv4.ip_forward                 : 启用 IPv4 数据包的转发功能
 cat <<EOF | sudo tee /etc/sysctl.d/99-kubernetes-cri.conf
-# net.bridge.bridge-nf-call-iptables  = 1
-# net.bridge.bridge-nf-call-ip6tables = 1
+net.bridge.bridge-nf-call-iptables  = 1
+net.bridge.bridge-nf-call-ip6tables = 1
 net.ipv4.ip_forward                 = 1
 EOF
-#使配置生效:
+# 使配置生效:
 sysctl -p /etc/sysctl.d/99-kubernetes-cri.conf
+sysctl --system
 
 # 通过运行以下命令验证是否加载了`br_netfilter`，`overlay`模块：
 ehco "通过运行以下命令验证是否加载了`br_netfilter`，`overlay`模块"
