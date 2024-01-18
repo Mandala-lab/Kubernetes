@@ -2,12 +2,20 @@
 
 export CONTAINERD_CONFIG_FILE_PATH="/etc/containerd/config.toml"
 
+# containerd config default | tee /etc/containerd/config.toml
+
 # 添加ctr加速
-sed -i 's#config_path = ""#config_path = "/etc/containerd/certs.d"#g' $CONTAINERD_CONFIG_FILE_PATH
+# 匹配第一个匹配到的config_path行. 并替换为config_path = /etc/containerd/certs.d
+sed -i '0,/config_path = ""/{s#config_path = ""#config_path = "/etc/containerd/certs.d"#}' $CONTAINERD_CONFIG_FILE_PATH
+grep -nE "config_path" /etc/containerd/config.toml
+
 # docker hub镜像加速
 mkdir -p /etc/containerd/certs.d/docker.io
 cat > /etc/containerd/certs.d/docker.io/hosts.toml << EOF
 server = "https://docker.io"
+[host."https://docker.mirrors.ustc.edu.cn"]
+capabilities = ["pull", "resolve"]
+
 [host."https://dockerproxy.com"]
   capabilities = ["pull", "resolve"]
 
@@ -22,13 +30,14 @@ server = "https://docker.io"
 
 [host."http://hub-mirror.c.163.com"]
   capabilities = ["pull", "resolve"]
-
 EOF
 
 # registry.k8s.io镜像加速
 mkdir -p /etc/containerd/certs.d/registry.k8s.io
 tee /etc/containerd/certs.d/registry.k8s.io/hosts.toml << 'EOF'
 server = "https://registry.k8s.io"
+[host."registry.cn-hangzhou.aliyuncs.com/google_containers"]
+capabilities = ["pull", "resolve", "push"]
 
 [host."https://k8s.m.daocloud.io"]
   capabilities = ["pull", "resolve", "push"]
@@ -124,4 +133,4 @@ registry.k8s.io/prometheus-adapter/prometheus-adapter:v0.11.2 \
 --hosts-dir=$CONTAINERD_CONFIG_FILE_PATH
 
 # crictl
-crictl pull registry.k8s.io/prometheus-adapter/prometheus-adapter:v0.11.2
+# crictl pull registry.k8s.io/prometheus-adapter/prometheus-adapter:v0.11.2
