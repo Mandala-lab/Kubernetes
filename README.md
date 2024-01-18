@@ -8,6 +8,16 @@
 
 与本仓库同步的文章: https://juejin.cn/post/7292041370893778983
 
+## 说明
+| 目录                     | 角色            | 作用                   | 备注                                      |
+|------------------------|---------------|----------------------|-----------------------------------------|
+| 01-base-env            | ALL           | 安装与配置Kubernetes所需的环境 | 当前仅适用于Ubuntu发行版                         |
+| 02-CRI                 | ALL           | 安装与配置CRI容器运行时        | 当前只适配Containerd                         |
+| 03-CNI                 |               | 安装与配置CNI             | 如果是kube-proxy组件,则需要安装                   |
+| 04-cgroup              | ALL           | 配置cgroup             | 当前仅适用于Ubuntu发行版                         |
+| 05-crictl              | Control plane | 安装与配置crictl          | 二进制安装需要单独安装, 包管理器安装的方式已经安装该工具. 但它们都需要配置 |
+| 06-apt-init-components | ALL           | 安装Kubernetes组件与初始化集群 | 当前仅适合Ubuntu                             |
+
 ## 注意事项
 1. 你需要查看shell的内容, 里面大多包含注释和注意事项
 2. 该仓库的脚本不适合用于生产环境的部署, 尽管这些脚本经过本人验证
@@ -15,16 +25,24 @@
 
 ## 使用
 
-> 必须安装01的顺序开始进行部署
+在目标服务器安装:
+```shell
+git clone --depth 1 https://github.com/Mandala-lab/Kubernetes.git
+```
 
 ### Master 控制平面
-根据目录的编号执行,一边执行一边查看输出内容是否符合预期
+#### Cilium
+##### Base 基本安装
+chmod +x ./base-env-apt-cilium-install.sh
+./base-env-apt-cilium-install.sh
 
 ### Worknode 工作节点
-执行`01-base`和`02-containerd`脚本和`03-install-worknode-kubernetes.sh`文件, 把在部署Master节点输出的Token进行复制, 即可加入集群
+
 
 ## 局限性
 1. 目前仅在Ubuntu22.04上进行开发和测试
+2. 需要在拥有管理员执行的权限才可以运行shell scripts
+3. 本集群是在管理员权限的情况下部署, 不适用于对安全性有苛刻要求的环境
 
 ## 资料
 1. https://kubernetes.io/docs/tasks/tools/install-kubectl-linux/

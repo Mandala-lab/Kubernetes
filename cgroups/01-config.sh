@@ -3,6 +3,8 @@
 set -x
 
 # 查看cgroup
+# https://man7.org/linux/man-pages/man7/cgroups.7.html
+# https://kubernetes.io/zh-cn/docs/concepts/architecture/cgroups/#using-cgroupv2
 # 获取文件系统类型
 filesystem_type=$(stat -fc %T /sys/fs/cgroup)
 

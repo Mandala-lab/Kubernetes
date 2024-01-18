@@ -42,7 +42,7 @@ echo "正在生成containerd的文件"
 # 生成containerd的配置文件
 mkdir -p /etc/containerd/
 containerd config default | tee /etc/containerd/config.toml
-# 配置文件默认在`/etc/containerd/config.toml` 这里仅修改两处配置, 读者可以修改自己想要的配置
+# 配置文件默认在`/etc/containerd/config.toml` 这里仅修改两处配置
 # 替换为国内镜像, 国内服务器请使用
 sed -i 's#registry.k8s.io/pause:3.8#registry.cn-hangzhou.aliyuncs.com/google_containers/pause:3.9#g' /etc/containerd/config.toml
 # 当 systemd 是选定的初始化系统时, 应当选择SystemdCgroup = true, 否则不需要修改
