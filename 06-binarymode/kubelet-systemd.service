@@ -1,0 +1,20 @@
+# 此文件指定由 kubeadm 为 kubelet 管理的所有文件的默认位置。
+#
+# 用于 TLS 引导程序的 KubeConfig 文件为 /etc/kubernetes/bootstrap-kubelet.conf， 但仅当 /etc/kubernetes/kubelet.conf 不存在时才能使用。
+# 具有唯一 kubelet 标识的 KubeConfig 文件为 /etc/kubernetes/kubelet.conf。
+# 包含 kubelet 的组件配置的文件为 /var/lib/kubelet/config.yaml。
+# 包含的动态环境的文件 KUBELET_KUBEADM_ARGS 是来源于 /var/lib/kubelet/kubeadm-flags.env。
+# 包含用户指定标志替代的文件 KUBELET_EXTRA_ARGS 是来源于 /etc/default/kubelet（对于 DEB），或者 /etc/sysconfig/kubelet（对于 RPM）。 KUBELET_EXTRA_ARGS 在标志链中排在最后，并且在设置冲突时具有最高优先级。
+
+[Service]
+Environment="KUBELET_KUBECONFIG_ARGS=--bootstrap-kubeconfig=/etc/kubernetes/bootstrap-kubelet.conf --kubeconfig=/etc/kubernetes/kubelet.conf"
+Environment="KUBELET_CONFIG_ARGS=--config=/var/lib/kubelet/config.yaml"
+# 这是 "kubeadm init" 和 "kubeadm join" 运行时生成的文件，
+# 动态地填充 KUBELET_KUBEADM_ARGS 变量
+EnvironmentFile=-/var/lib/kubelet/kubeadm-flags.env
+# 这是一个文件，用户在不得已下可以将其用作替代 kubelet args。
+# 用户最好使用 .NodeRegistration.KubeletExtraArgs 对象在配置文件中替代。
+# KUBELET_EXTRA_ARGS 应该从此文件中获取。
+EnvironmentFile=-/etc/default/kubelet
+ExecStart=
+ExecStart=/usr/bin/kubelet $KUBELET_KUBECONFIG_ARGS $KUBELET_CONFIG_ARGS $KUBELET_KUBEADM_ARGS $KUBELET_EXTRA_A

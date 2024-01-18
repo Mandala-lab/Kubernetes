@@ -1,0 +1,11 @@
+apiVersion: kubeadm.k8s.io/v1beta3
+kind: JoinConfiguration
+discovery:
+  bootstrapToken:
+    token: "1j47f9.5afppkcbh0bolgm4"
+    apiServerEndpoint: "192.168.2.152:6443"
+    caCertHashes:
+      - "sha256:2134bbf274f0cf1e539d638f42f81c76187b692310ff0129d40a70935e6f2eeb"
+nodeRegistration:
+  name: "worker-node-155"
+  criSocket: "/var/run/containerd/containerd.sock"
