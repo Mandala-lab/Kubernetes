@@ -78,8 +78,6 @@ net.ipv4.conf.default.rp_filter = 0
 EOF
 sysctl -p /etc/sysctl.d/96-cilium.conf
 
-
-
 # 允许gdb附加到进程用户空间进行调试
 # sudo sed -i 's/kernel.yama.ptrace_scope = [12]/kernel.yama.ptrace_scope = 0/g' /etc/sysctl.d/10-ptrace.conf
 

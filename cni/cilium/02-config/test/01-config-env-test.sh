@@ -12,7 +12,7 @@ EOF
 sysctl -p /etc/sysctl.d/96-purelb.conf
 
 # 允许gdb附加到进程用户空间进行调试
-sudo sed -i 's/kernel.yama.ptrace_scope = [12]/kernel.yama.ptrace_scope = 0/g' /etc/sysctl.d/10-ptrace.conf
+# sudo sed -i 's/kernel.yama.ptrace_scope = [12]/kernel.yama.ptrace_scope = 0/g' /etc/sysctl.d/10-ptrace.conf
 
 # https://kubernetes.io/docs/concepts/extend-kubernetes/compute-storage-net/network-plugins/#network-plugin-requirements
 cat > /etc/sysctl.d/99-zzz-override_cilium.conf <<EOF

@@ -8,7 +8,7 @@ cd $HOME || exit
 
 # 获取当前版本的Kubernetes组件的镜像列表
 # 并且替换为国内的阿里云镜像进行下载
-VERSION="v1.29.0"
+VERSION=$(curl -L -s https://dl.k8s.io/release/stable.txt)
 # registry.cn-hangzhou.aliyuncs.com/google_containers
 kubeadm config images list --kubernetes-version $VERSION \
 | sed 's|registry.k8s.io|crictl pull registry.aliyuncs.com/google_containers|g' \

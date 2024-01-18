@@ -1,5 +1,9 @@
 #!/bin/bash
-#set -x
+# 此文件是用于下载二进制的Containerd
+# 并针对国内服务器进行优化
+# 添加镜像拉取的源替换为国内的镜像源
+
+set -x
 
 # 删除之前的
 rm -rf /opt/containerd/
@@ -13,6 +17,7 @@ rm -rf /etc/sysctl.d/99-kubernetes-cri.conf
 hash -r
 
 # 安装containerd
+# TODO 编写可动态获取版本的shell
 export VERSION="1.7.12"
 ARCH=""
 # 使用uname -m获取架构信息
@@ -39,15 +44,18 @@ else
 fi
 
 echo "正在生成containerd的文件"
+export CONTAINERD_CONFIG_FILE_PATH="/etc/containerd/config.toml"
 # 生成containerd的配置文件
 mkdir -p /etc/containerd/
-containerd config default | tee /etc/containerd/config.toml
+containerd config default | tee $CONTAINERD_CONFIG_FILE_PATH
 # 配置文件默认在`/etc/containerd/config.toml` 这里仅修改两处配置
 # 替换为国内镜像, 国内服务器请使用
-sed -i 's#registry.k8s.io/pause:3.8#registry.cn-hangzhou.aliyuncs.com/google_containers/pause:3.9#g' /etc/containerd/config.toml
+sed -i 's#sandbox_image = .*#sandbox_image = "registry.cn-hangzhou.aliyuncs.com/google_containers/pause:3.9"#' $CONTAINERD_CONFIG_FILE_PATH
+grep -nE "sandbox_image" $CONTAINERD_CONFIG_FILE_PATH
+
 # 当 systemd 是选定的初始化系统时, 应当选择SystemdCgroup = true, 否则不需要修改
 # 参考: https://kubernetes.io/zh-cn/docs/setup/production-environment/container-runtimes/#containerd-systemd
-sed -i 's#SystemdCgroup = false#SystemdCgroup = true#g' /etc/containerd/config.toml
+sed -i 's#SystemdCgroup = false#SystemdCgroup = true#g' $CONTAINERD_CONFIG_FILE_PATH
 
 # 下载containerd.service
 # 配置containerd的service单元文件
@@ -111,10 +119,10 @@ systemctl restart containerd
 #systemctl status containerd
 
 # 校验配置文件
-grep -nE "sandbox_image|SystemdCgroup" /etc/containerd/config.toml
+grep -nE "sandbox_image|SystemdCgroup" $CONTAINERD_CONFIG_FILE_PATH
 
 cat /etc/modules-load.d/containerd.conf
 
 ctr -v
 
-#set +x
+set +x
