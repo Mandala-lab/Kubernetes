@@ -93,17 +93,6 @@ rm -rf ./runc.${ARCH}
 #192.168.2.102 node-102
 #EOF
 
-cat >> /etc/hosts << EOF
-192.168.3.152 node-152
-192.168.3.155 node-155
-192.168.3.158 node-158
-192.168.3.160 node-160
-192.168.3.100 node-100
-192.168.3.101 node-101
-192.168.3.102 node-102
-EOF
-cat /etc/hosts
-
 # systemd-resolved
 systemctl restart systemd-resolved
 #systemctl status systemd-resolved
@@ -197,9 +186,6 @@ lsmod | grep overlay
 
 echo "/etc/sysctl.d/99-kubernetes-cri.conf:"
 cat /etc/sysctl.d/99-kubernetes-cri.conf
-
-echo "/etc/modules-load.d/k8s.conf:"
-cat /etc/modules-load.d/k8s.conf
 
 #echo "blkid | grep swap: 为空就正常"
 #sudo blkid | grep swap
