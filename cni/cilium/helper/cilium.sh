@@ -8,6 +8,12 @@ kubectl -n kube-system rollout restart ds/cilium
 
 kubectl -n kube-system rollout restart deployment coredns
 
+kubectl -n monitoring rollout restart deployment prometheus-operator
+kubectl -n monitoring rollout restart deployment kube-state-metrics
+kubectl -n monitoring rollout restart deployment grafana
+kubectl -n monitoring rollout restart deployment blackbox-exporter
+kubectl -n monitoring rollout restart deployment prometheus-adapter
+
 cilium status --wait
 
 nohup cilium connectivity test&
@@ -28,14 +34,14 @@ kubectl -n kube-system exec pod/cilium-5g2k4 -- cilium-health status
 kubectl -n kube-system exec pod/cilium-5g2k4 -- cilium monitor --type drop
 
 cilium upgrade cilium cilium/cilium \
---version v1.15.0-rc.0 \
+--version v1.15.1 \
 --namespace kube-system \
 --reuse-values \
 
 helm repo add cilium https://helm.cilium.io/
 helm repo update
 helm upgrade \
---version v1.15.0-rc.0 \
+--version v1.15.1 \
 --namespace kube-system \
 cilium cilium/cilium \
 --reuse-values \
@@ -117,6 +123,12 @@ kubectl -n kube-system rollout restart ds/cilium
 # BGP
 --set bgp.enabled=true \ #在ciilium内部启用BGP支持;为BGP嵌入一个新的ConfigMap
 --set bgp.announce.loadbalancerIP=true \ #开启服务负载均衡器ip的分配和通告
+--version v1.15.1
+--set ipam.mode=kubernetes \
+--set tunnel=disabled \
+--set ipv4NativeRoutingCIDR="10.0.0.0/8" \
+--set bgpControlPlane.enabled=true \
+--set k8s.requireIPv4PodCIDR=true \
 
 #  hubble.relay
 --set hubble.relay.enabled=true \

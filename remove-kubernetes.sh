@@ -22,13 +22,14 @@ systemctl stop kubelet
 systemctl stop kubectl
 
 # configfile
-rm -rf /etc/modules-load.d/k8s.conf
-rm -rf /etc/modules-load.d/ipvs.conf
-rm -rf /lib/systemd/system/kube*
-rm -rf /etc/sysctl.d/99-sysctl.conf
-rm -rf /etc/sysctl.d/99-zzz-override_cilium.conf
-rm -rf /etc/sysctl.d/99-kubernetes-cri.conf
-rm -rf /etc/sysctl.d/10-network-security.conf
+sudo rm -rf /etc/modules-load.d/k8s.conf
+sudo rm -rf /etc/modules-load.d/ipvs.conf
+sudo rm -rf /lib/systemd/system/kube*
+sudo rm -rf /etc/sysctl.d/99-sysctl.conf
+sudo rm -rf /etc/sysctl.d/99-zzz-override_cilium.conf
+sudo rm -rf /etc/sysctl.d/99-kubernetes-cri.conf
+sudo rm -rf /etc/sysctl.d/10-network-security.conf
+sudo rm /etc/cni/net.d/05-cilium.conf
 
 # service
 rm -rf /etc/systemd/system/kube*

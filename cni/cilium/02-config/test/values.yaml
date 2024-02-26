@@ -1,0 +1,42 @@
+kubeProxyReplacement: true
+k8sServiceHost: 192.168.3.160
+k8sServicePort: 6443
+cluster.name: pro
+cluster.id: 1
+l2announcements:
+  enabled: true
+  externalIPs:
+    enabled: true
+k8sClientRateLimit:
+  qps: 50
+  burst: 100
+#ipam:
+#  operator:
+#    clusterPoolIPv4PodCIDRList:
+#      - "192.168.3.0/16"
+#    clusterPoolIPv4MaskSize: 24
+hubble:
+  enabled: true
+  relay:
+    enabled: true
+  ui:
+    enabled: true
+  metrics:
+    enabled:
+      - dns
+      - drop
+      - tcp
+      - flow
+      - port-distribution
+      - icmp
+      - httpV2:exemplars=true;labelsContext=source_ip,source_namespace,source_workload,destination_ip,destination_namespace,destination_workload,traffic_direction
+      - kafka
+bpf:
+  masquerade: true
+  tproxy: true
+gatewayAPI:
+  enabled: true
+ingressController:
+  enabled: true
+  default: true
+  loadbalancerMode: shared

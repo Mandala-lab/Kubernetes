@@ -5,7 +5,7 @@ helm repo update
 export DEVICES="enp0s5"
 export HOST="192.168.3.160"
 export K8S_API_SERVER_PORT="6443"
-export CILIUM_VERSION="1.15.0-rc.0"
+export CILIUM_VERSION="1.15.0"
 export CLUSTER_NAME="prvite-kubernetes"
 export CLUSTER_ID=1
 helm install cilium cilium/cilium --version $CILIUM_VERSION \

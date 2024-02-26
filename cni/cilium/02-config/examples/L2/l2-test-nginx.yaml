@@ -1,0 +1,82 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: nginx-quic
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx-lb
+spec:
+  selector:
+    matchLabels:
+      app: nginx-lb
+  replicas: 4
+  template:
+    metadata:
+      labels:
+        app: nginx-lb
+    spec:
+      containers:
+        - name: nginx-lb
+          #image: tinychen777/nginx-quic:latest
+          image: nginx:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 80
+---
+apiVersion: v1
+kind: Service
+metadata:
+  annotations:
+    purelb.io/service-group: layer2-ippool
+  name: nginx-lb-service
+
+spec:
+  allocateLoadBalancerNodePorts: false
+  externalTrafficPolicy: Cluster
+  internalTrafficPolicy: Cluster
+  selector:
+    app: nginx-lb
+  ports:
+    - protocol: TCP
+      port: 80 # match for service access port
+      targetPort: 80 # match for pod access port
+  type: LoadBalancer
+---
+apiVersion: v1
+kind: Service
+metadata:
+  annotations:
+    purelb.io/service-group: layer2-ippool
+  name: nginx-lb2-service
+
+spec:
+  allocateLoadBalancerNodePorts: false
+  externalTrafficPolicy: Cluster
+  internalTrafficPolicy: Cluster
+  selector:
+    app: nginx-lb
+  ports:
+    - protocol: TCP
+      port: 80 # match for service access port
+      targetPort: 80 # match for pod access port
+  type: LoadBalancer
+---
+apiVersion: v1
+kind: Service
+metadata:
+  annotations:
+    purelb.io/service-group: layer2-ippool
+  name: nginx-lb3-service
+spec:
+  allocateLoadBalancerNodePorts: false
+  externalTrafficPolicy: Cluster
+  internalTrafficPolicy: Cluster
+  selector:
+    app: nginx-lb
+  ports:
+    - protocol: TCP
+      port: 80 # match for service access port
+      targetPort: 80 # match for pod access port
+  type: LoadBalancer

@@ -1,0 +1,11 @@
+# Source: https://docs.cilium.io/en/v1.15/network/lb-ipam/#lb-ipam
+apiVersion: "cilium.io/v2alpha1"
+kind: CiliumLoadBalancerIPPool
+metadata:
+  name: "default"
+spec:
+  blocks:
+    - cidr: "20.0.10.0/24"
+
+# kubectl get ippools
+# kubectl get ippools/default -o jsonpath='{.status.conditions[?(@.type=="cilium.io/PoolConflict")].message}'

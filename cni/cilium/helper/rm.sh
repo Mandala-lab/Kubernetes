@@ -29,6 +29,10 @@ iptables -t mangle -Z
 
 sudo ipvsadm -C
 
+# remove cilium
+rm -rf /usr/local/bin/cilium
+rm -rf /usr/bin/cilium
+
 # 清理 CNI 配置
 rm -rf /etc/cni/net.d/
 rm -rf /opt/cni/bin/
@@ -42,4 +46,4 @@ sudo ip link list | grep cilium_host@cilium_net | awk '{print $2}' | cut -c 1-11
 sudo ip route flush proto bird # 更新路由
 
 # bfp, 谨慎删除
-# rm -rf /etc/systemd/system/sys-fs-bpf.mount
+rm -rf /etc/systemd/system/sys-fs-bpf.mount

@@ -11,19 +11,19 @@ bootstrapTokens:
 #      - authentication # 用于身份验证
 localAPIEndpoint:
   # masterIP 主节点用于广播的地址
-  advertiseAddress: 192.168.3.160
+  advertiseAddress: 192.168.3.161
   # Kubernetes API 服务器监听的端口
   bindPort: 6443
 nodeRegistration:
-  name: "node-160" # 该控制节点的名称, 也就是出现在kubectl get no的名称
+  name: "node-161" # 该控制节点的名称, 也就是出现在kubectl get no的名称
   # CRI（容器运行时接口）的通信 socket 用来读取容器运行时的信息。 此信息会被以注解的方式添加到 Node API 对象至上，用于后续用途。
   criSocket: unix:///var/run/containerd/containerd.sock
   # 镜像拉取策略。 这两个字段的值必须是 "Always"、"Never" 或 "IfNotPresent" 之一。 默认值是 "IfNotPresent"，也是添加此字段之前的默认行为
-  imagePullPolicy: IfNotPresent
+  imagePullPolicy: Always
   # 定 Node API 对象被注册时要附带的污点。 若未设置此字段（即字段值为 null），默认为控制平面节点添加控制平面污点。 如果你不想污染你的控制平面节点，可以将此字段设置为空列表
   taints:
-  - effect: PreferNoSchedule
-    key: node-role.kubernetes.io/master
+    - effect: PreferNoSchedule
+      key: node-role.kubernetes.io/master
   # 提供一组在当前节点被注册时可以忽略掉的预检错误。 例如：IsPrevilegedUser,Swap。 取值 all 忽略所有检查的错误。
   #ignorePreflightErrors:
   #  - IsPrivilegedUser
@@ -34,20 +34,12 @@ apiServer:
   # certSANs 设置 API 服务器签署证书所用的额外主题替代名（Subject Alternative Name，SAN）。
   certSANs:
     # 集群中各个节点的 IP 地址、域名、负载均衡、或者集群的公共访问地址作为 certSANs 字段的值
-    - 192.168.3.152
-    - "node-152"
-    - 192.168.3.155
-    - "node-155"
-    - 192.168.3.158
-    - "node-158"
-    - 192.168.3.160
-    - "node-160"
-    - 192.168.3.100
-    - "node-100"
-    - 192.168.3.101
-    - "node-101"
-    - 192.168.3.102
-    - "node-102"
+    - 192.168.3.161
+    - 192.168.3.162
+    - 192.168.3.163
+    - "node-161"
+    - "node-162"
+    - "node-163"
   extraArgs:
     # API 服务器的授权模式
     authorization-mode: Node,RBAC
@@ -62,19 +54,19 @@ apiServer:
 apiVersion: kubeadm.k8s.io/v1beta3
 kind: ClusterConfiguration
 # 版本信息
-kubernetesVersion: 1.29.0
+kubernetesVersion: 1.29.2
 # 证书目录路径
 certificatesDir: /etc/kubernetes/pki
 # 集群名称。
 clusterName: kubernetes
 # 控制器管理器配置
-controllerManager: {}
+controllerManager: { }
 # DNS 配置
-dns: {}
+dns: { }
 # etcd 数据库的配置。例如使用这个部分可以定制本地 etcd 或者配置 API 服务器 使用一个外部的 etcd 集群。
 etcd:
   local:
-    # etcd 数据存储目录
+  # etcd 数据存储目录
 #    dataDir: /var/lib/etcd
 #    imageRepository: "registry.k8s.io"
 #    imageTag: "3.2.24"
@@ -100,33 +92,44 @@ imageRepository: registry.cn-hangzhou.aliyuncs.com/google_containers # 镜像源
 # 在一个包含不止一个控制面实例的集群中，该字段应该设置为放置在控制面 实例之前的外部负载均衡器的地址。
 # 在带有强制性节点回收的环境中，controlPlaneEndpoint 可以用来 为控制面设置一个稳定的 DNS。
 # 负载均衡地址或者master的主机
-controlPlaneEndpoint: "192.168.3.160:6443"
+controlPlaneEndpoint: "192.168.3.161:6443"
 # 其中包含集群的网络拓扑配置。使用这一部分可以定制 Pod 的 子网或者 Service 的子网。
 networking:
   # Kubernetes 服务所使用的的 DNS 域名。 默认值为 "cluster.local"。
   dnsDomain: cluster.local
-  # 为 Pod 所使用的子网
-  podSubnet: 10.244.0.0/16
-  # Kubernetes 服务所使用的的子网。 默认值为 "10.96.0.0/12"。
-  serviceSubnet: 10.96.0.0/12
+  # 为 Pod 所使用的子网 默认为: 10.244.0.0/16
+  # 10.10.0.0到10.10.63.255，共有16384个IP地址
+  # 如果是flannel插件, 需要修改flannel的yaml文件的net-conf.json为当前的podSubnet值
+  podSubnet: "10.10.0.0/18"
+  #  podSubnet: "10.10.0.0/17"
+  # Kubernetes 服务所使用的的子网。 默认值为 "10.96.0.0/12"
+  # 10.10.0.0/17的范围是从10.10.0.0到10.10.127.255，共有32768个IP地址可以包含pod和svc的范围
+  # 10.10.66.0/20的范围是从10.10.64.0到10.10.79.255，共有4096个IP地址
+  serviceSubnet: "10.10.66.0/20"
+  #serviceSubnet: "10.10.0.0/17"
 # 调度器配置
-scheduler: {}
+scheduler: { }
 ---
 apiVersion: kubelet.config.k8s.io/v1beta1
 kind: KubeletConfiguration
-#address: "192.168.3.155" # kubelet 将在 192.168.0.8 IP 地址上提供服务
+#address: "192.168.2.155" # kubelet 将在 192.168.0.8 IP 地址上提供服务
 #port: 20250 # kubelet 将在 20250 端口上提供服务
 serializeImagePulls: true # 并行拉取镜像, 默认值false
 # kubelet 将在以下情况之一驱逐 Pod:
 evictionHard:
   # 可用内存低于设定的值时
-  memory.available:  "100Mi"
-  nodefs.available:  "10%"
+  memory.available: "100Mi"
+  nodefs.available: "10%"
   # 当节点主文件系统的已使用 inode超过设定的值时
   nodefs.inodesFree: "5%"
   # 当镜像文件系统的可用空间小于
   imagefs.available: "15%"
 # 是 kubelet 用来操控宿主系统上控制组（CGroup） 的驱动程序（cgroupfs 或 systemd）
 # 当 systemd 是初始化系统时， 不 推荐使用 cgroupfs 驱动，因为 systemd 期望系统上只有一个 cgroup 管理器。
-# 此外，如果你使用 cgroup v2， 则使用systemd值
+# 此外，如果你使用 cgroup v2， 则使用systemd值, 从 v1.22 及更高版本开始，使用 kubeadm 创建集群时默认值为systemd
 cgroupDriver: systemd
+---
+apiVersion: kubeproxy.config.k8s.io/v1alpha1
+kind: KubeProxyConfiguration
+# kube-proxy specific options here
+mode: "ipvs"

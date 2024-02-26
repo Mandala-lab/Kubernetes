@@ -62,7 +62,7 @@ apiServer:
 apiVersion: kubeadm.k8s.io/v1beta3
 kind: ClusterConfiguration
 # 版本信息
-kubernetesVersion: 1.29.0
+kubernetesVersion: 1.29.1
 # 证书目录路径
 certificatesDir: /etc/kubernetes/pki
 # 集群名称。
@@ -163,7 +163,7 @@ logging:
 memorySwap: {}
 nodeStatusReportFrequency: 0s
 nodeStatusUpdateFrequency: 0s
-resolvConf: /run/systemd/resolve/resolv.conf
+resolvConf: /run/systemd/resolve/resolv.conf # DNS文件文件
 rotateCertificates: true
 runtimeRequestTimeout: 0s
 shutdownGracePeriod: 0s

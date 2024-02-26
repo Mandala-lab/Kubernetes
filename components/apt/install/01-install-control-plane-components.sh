@@ -1,6 +1,6 @@
 #!/bin/sh
 
-set -x
+#set -x
 
 # 清除旧安装
 systemctl stop kubeadm
@@ -20,16 +20,25 @@ rm -rf /etc/apt/sources.list.d/kubernetes.list
 rm -rf /usr/lib/systemd/system/kubelet.service.d/10-kubeadm.confkub
 sudo apt autoremove -y
 
+unset http_proxy
+unset https_proxy
+
 # 安装 kubeadm、kubelet
 sudo apt install -y apt-transport-https ca-certificates curl
-VERSION=$(curl -L -s https://dl.k8s.io/release/stable.txt)
+VERSION="v1.29"
 echo "deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/$VERSION/deb/ /" \
 | sudo tee /etc/apt/sources.list.d/kubernetes.list
 
 mkdir -p /etc/apt/keyrings/
 curl -fsSL https://pkgs.k8s.io/core:/stable:/$VERSION/deb/Release.key | sudo gpg --dearmor -o /etc/apt/keyrings/kubernetes-apt-keyring.gpg
 
+# 遇到
+# Reading package lists... Done
+# E: Method https has died unexpectedly!
+# E: Sub-process https received signal 4.
+# GNUTLS_CPUID_OVERRIDE=0x1 apt update -y
 apt update -y
+# GNUTLS_CPUID_OVERRIDE=0x1 apt install -y containerd conntrack socat kubelet kubeadm kubectl
 apt install -y containerd conntrack socat kubelet kubeadm kubectl
 
 # 配置 cgroup 驱动与CRI一致
@@ -74,4 +83,4 @@ kubectl version --client
 # Can't use ipvs proxier, trying iptables proxier
 # Using iptables Proxier.
 
-set +x
+#set +x
