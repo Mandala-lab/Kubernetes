@@ -86,6 +86,7 @@ ip link delete cni0
 ifconfig kube-ipvs0 down
 ip link delete kube-ipvs0
 
+# cilium
 ifconfig cilium_netdown
 ip link delete kube-cilium_netdown
 

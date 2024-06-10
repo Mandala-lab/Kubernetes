@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 set -x
 
@@ -26,40 +26,103 @@ export DOWNLOAD_HOME="/home/kubernetes"
 mkdir -p $DOWNLOAD_HOME
 cd "$DOWNLOAD_HOME" || exit
 
-RELEASE="$(curl -sSL https://dl.k8s.io/release/stable.txt)"
-ARCH="amd64"
-#ARCH="arm64"
+RELEASE=$(wget -qO- https://dl.k8s.io/release/stable.txt)
+#RELEASE="$(curl -LO https://dl.k8s.io/release/stable.txt)"
 
-# https://dl.k8s.io/release/v1.29.0/bin/linux/amd64/kubeadm
-# https://dl.k8s.io/release/v1.29.0/bin/linux/amd64/kubelet
-# https://dl.k8s.io/release/v1.29.0/bin/linux/amd64/kubectl
-sudo curl -LO "https://dl.k8s.io/release/${RELEASE}/bin/linux/${ARCH}/{kubeadm,kubeadm.sha256}"
-if echo "$(cat kubeadm.sha256) kubeadm" | sha256sum -c; then
-  echo "kubeadm 的SHA256 校验成功"
+# 使用uname -m获取系统架构
+arch_raw=$(uname -m)
+
+# 根据获取的原始架构信息映射到规范的架构名称
+case $arch_raw in
+  x86_64)
+    ARCH="amd64"
+    ;;
+  aarch64)
+    ARCH="arm64"
+    ;;
+  *)
+    echo "Unsupported architecture: $arch_raw"
+    exit 1
+    ;;
+esac
+
+# 输出最终的架构名称
+echo "Detected architecture: $ARCH"
+
+# kubeadm
+if [ -f "$DOWNLOAD_HOME/kubeadm" ] && [ -f "$DOWNLOAD_HOME/kubeadm.sha256" ]; then
+    if echo "$(cat kubeadm.sha256) kubeadm" | sha256sum -c; then
+      echo "kubeadm 的SHA256 校验成功"
+    else
+      echo "kubeadm 的SHA256 校验失败，退出并报错"
+      rm -rf kubeadm kubeadm.sha256
+      exit 1
+    fi
+    sudo cp ./kubeadm /usr/local/bin/
+    sudo chmod +x /usr/local/bin/kubeadm
 else
-  echo "kubeadm 的SHA256 校验失败，退出并报错"
-  exit 1
+    echo "kubelet.service 不存在"
+    curl -LO "https://dl.k8s.io/release/${RELEASE}/bin/linux/${ARCH}/{kubeadm,kubeadm.sha256}"
+    #sudo wget https://dl.k8s.io/release/"${RELEASE}"/bin/linux/${ARCH}/{kubeadm,kubeadm.sha256}
+    if echo "$(cat kubeadm.sha256) kubeadm" | sha256sum -c; then
+      echo "kubeadm 的SHA256 校验成功"
+    else
+      echo "kubeadm 的SHA256 校验失败，退出并报错"
+      rm -rf kubeadm kubeadm.sha256
+      exit 1
+    fi
 fi
 
-sudo mv ./kubeadm /usr/local/bin/
-sudo chmod +x /usr/local/bin/kubeadm
-
-sudo curl -LO "https://dl.k8s.io/release/${RELEASE}/bin/linux/${ARCH}/{kubelet,kubelet.sha256}"
-
-echo "$(cat kubelet.sha256) kubelet" | sha256sum -c
-
-sudo mv ./kubelet /usr/local/bin/
-sudo chmod +x /usr/local/bin/kubelet
+# kubelet
+if [ -f "$DOWNLOAD_HOME/kubelet" ] && [ -f "$DOWNLOAD_HOME/kubelet.sha256" ]; then
+    if echo "$(cat kubelet.sha256) kubelet" | sha256sum -c; then
+      echo "kubelet 的SHA256 校验成功"
+    else
+      echo "kubelet 的SHA256 校验失败，退出并报错"
+      rm -rf kubelet kubelet.sha256
+      exit 1
+    fi
+    sudo cp ./kubelet /usr/local/bin/
+    sudo chmod +x /usr/local/bin/kubelet
+else
+    echo "kubelet.service 不存在"
+    sudo curl -LO "https://dl.k8s.io/release/${RELEASE}/bin/linux/${ARCH}/{kubelet,kubelet.sha256}"
+    #sudo wget https://dl.k8s.io/release/"${RELEASE}"/bin/linux/${ARCH}/{kubelet,kubelet.sha256}
+    if echo "$(cat kubelet.sha256) kubelet" | sha256sum -c; then
+      echo "kubelet 的SHA256 校验成功"
+    else
+      echo "kubelet 的SHA256 校验失败，退出并报错"
+      rm -rf kubelet kubelet.sha256
+      exit 1
+    fi
+fi
 
 # kubectl
-sudo curl -LO "https://dl.k8s.io/release/${RELEASE}/bin/linux/${ARCH}/{kubectl,kubectl.sha256}"
-if echo "$(cat kubectl.sha256) kubectl" | sha256sum -c; then
-  echo "kubectl 的SHA256 校验失败，退出并报错"
-#  exit 1
+if [ -f "$DOWNLOAD_HOME/kubectl" ] && [ -f "$DOWNLOAD_HOME/kubectl.sha256" ]; then
+    if echo "$(cat kubectl.sha256) kubectl" | sha256sum -c; then
+      echo "kubectl 的SHA256 校验成功"
+    else
+      echo "kubectl 的SHA256 校验失败，退出并报错"
+      rm -rf kubectl kubectl.sha256
+      exit 1
+    fi
+    DOWNLOAD_DIR="/usr/local/bin"
+    rm -rf $DOWNLOAD_DIR/kubectl
+    sudo install -o root -g root -m 0755 kubectl $DOWNLOAD_DIR/kubectl
+else
+    echo "kubectl.service 不存在"
+    #sudo curl -LO "https://dl.k8s.io/release/${RELEASE}/bin/linux/${ARCH}/{kubectl,kubectl.sha256}"
+    sudo wget https://dl.k8s.io/release/"${RELEASE}"/bin/linux/${ARCH}/{kubectl,kubectl.sha256}
+    if echo "$(cat kubectl.sha256) kubectl" | sha256sum -c; then
+      echo "kubectl 的SHA256 校验成功"
+    else
+      echo "kubectl 的SHA256 校验失败，退出并报错"
+      rm -rf kubectl kubectl.sha256
+      exit 1
+    fi
+    DOWNLOAD_DIR="/usr/local/bin"
+    sudo install -o root -g root -m 0755 kubectl $DOWNLOAD_DIR/kubectl
 fi
-echo "kubectl 的SHA256 校验成功"
-DOWNLOAD_DIR="/usr/local/bin"
-sudo install -o root -g root -m 0755 kubectl $DOWNLOAD_DIR/kubectl
 
 # 并添加 kubelet 系统服务
 # 查看 https://github.com/kubernetes/release/tree/master 获取RELEASE_VERSION的版本号

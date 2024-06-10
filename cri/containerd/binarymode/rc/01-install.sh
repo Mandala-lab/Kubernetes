@@ -28,7 +28,7 @@ hash -r
 
 # 安装containerd
 # TODO 编写可动态获取版本的shell
-export VERSION="1.7.17"
+export VERSION="2.0.0-rc.2"
 ARCH=""
 # 使用uname -m获取架构信息
 machine=$(uname -m)
@@ -40,8 +40,6 @@ elif [ "$machine" = "x86_64" ]; then
 else
     echo "请手动定义你的发行版的架构"
 fi
-
-echo "ARCH=${ARCH}"
 
 # 定义containerd的保存路径, 用于保存下载的Containerd二进制文件
 export CONTAINERD_HOME="/home/containerd"

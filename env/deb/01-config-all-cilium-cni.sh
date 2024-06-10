@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 
-set -x
+#set -x
+
+apt update -y
 # -e：如果任何命令的退出状态是非零值，脚本将立即退出。
 # -u：当使用未定义的变量时，脚本将立即退出。
 # -x：在执行每个命令之前，将命令及其参数输出到标准错误输出。
@@ -16,9 +18,9 @@ sudo cat /sys/class/dmi/id/product_uuid
 #export NEXT_ROUTE="192.168.3.1"
 #export CIDR="192.168.3.152/24"
 #export INTERFACE="enp0s5"
-## 当前服务器的IP与子网掩码地址
-##CIDR=$(ip -o -4 addr show | awk '$2 ~ /^(eth|en)/ {print $4}')
-## 网卡的接口名
+# 当前服务器的IP与子网掩码地址
+#CIDR=$(ip -o -4 addr show | awk '$2 ~ /^(eth|en)/ {print $4}')
+# 网卡的接口名
 #INTERFACE=$(ip -o link show | awk -F': ' '$2 ~ /^(eth|en)/ {print $2}')
 #
 #cp /etc/netplan/00-installer-config.yaml{,.back}
@@ -38,7 +40,7 @@ sudo cat /sys/class/dmi/id/product_uuid
 #            #- 114.114.114.114
 #            - $DNS_IP
 #      routes: # 配置静态路由
-#          - to: 0.0.0.0/0 # 目标网络地址，default 表示默认路由
+#          - to: default #目标网络地址，default 表示默认路由, 0.0.0.0/0
 #            via: $NEXT_ROUTE # 指定了路由数据包的下一跳地址，192.168.2.1 表示数据包将通过该地址进行路由
 #            metric: 100 # 指定了路由的优先级，数值越小优先级越高
 #            on-link: true # 表示数据包将直接发送到指定的下一跳地址，而不需要经过网关
@@ -55,28 +57,6 @@ sudo cat /sys/class/dmi/id/product_uuid
 apt install ntpdate -y # Ubuntu
 ntpdate time.windows.com
 
-# runc 是操作系统级别的软件包, 用于与Containerd Docker Podman等CRI底层的OCI工具
-# Containerd -> runc
-# 少数情况下, 系统可能没有安装runc或者配置不正确
-# TODO 切换为动态获取
-VERSION="v1.1.11"
-
-ARCH=""
-# 使用uname -m获取架构信息
-machine=$(uname -m)
-# 判断架构信息并设置变量的值
-if [ "$machine" = "aarch64" ]; then
-    ARCH="arm64"
-elif [ "$machine" = "x86_64" ]; then
-    ARCH="amd64"
-else
-    echo "请手动定义你的发行版的架构"
-fi
-echo $ARCH
-wget https://github.com/opencontainers/runc/releases/download/${VERSION}/runc.${ARCH}
-install -m 755 ./runc.${ARCH} /usr/local/sbin/runc
-
-rm -rf ./runc.${ARCH}
 # 包管理器:
 # apt install -y runc
 
@@ -84,13 +64,9 @@ rm -rf ./runc.${ARCH}
 
 # 修改Hosts
 #cat >> /etc/hosts << EOF
-#192.168.2.152 node-152
-#192.168.2.155 node-155
-#192.168.2.158 node-158
-#192.168.2.160 node-160
-#192.168.2.100 node-100
-#192.168.2.101 node-101
-#192.168.2.102 node-102
+#192.168.3.160 node-160
+#192.168.3.100 node-100
+#192.168.3.152 node-152
 #EOF
 
 # systemd-resolved
@@ -98,8 +74,8 @@ systemctl restart systemd-resolved
 #systemctl status systemd-resolved
 
 # 关闭SELinux
-sudo setenforce 0 # 临时禁用, 重启变回
-sudo sed -i 's/^SELINUX=enforcing$/SELINUX=permissive/' /etc/selinux/config # 禁用
+#sudo setenforce 0 # 临时禁用, 重启变回
+#sudo sed -i 's/^SELINUX=enforcing$/SELINUX=permissive/' /etc/selinux/config # 禁用
 
 # SWAP分区
 # kubelet 的默认行为是: 如果在节点上检测到交换内存，则无法启动。自 v1.22 起支持 Swap。
@@ -108,7 +84,6 @@ sudo sed -i 's/^SELINUX=enforcing$/SELINUX=permissive/' /etc/selinux/config # �
 sed -i '/^\/.*swap/s/^/#/' /etc/fstab
 sudo mount -a
 sudo swapoff -a
-cat /etc/fstab
 grep swap /etc/fstab
 
 # 检查是否存在swap分区
@@ -128,53 +103,118 @@ sudo blkid | grep swap
 # net.bridge.bridge-nf-call-ip6tables : 启用控制 IPv6 数据包经过桥接时是否要经过 ip6tables 过滤
 # net.ipv4.ip_forward                 : 启用 IPv4 数据包的转发功能
 cat <<EOF | sudo tee /etc/sysctl.d/99-kubernetes-cri.conf
-net.bridge.bridge-nf-call-iptables  = 1
-net.bridge.bridge-nf-call-ip6tables = 1
-net.ipv4.ip_forward                 = 1
+net.bridge.bridge-nf-call-iptables        = 1
+net.bridge.bridge-nf-call-ip6tables       = 1
+net.ipv4.ip_forward                       = 1
+net.ipv4.tcp_slow_start_after_idle        = 0
+net.core.rmem_max                         = 16777216
+fs.inotify.max_user_watches               = 524288
+kernel.softlockup_all_cpu_backtrace       = 1
+kernel.softlockup_panic                   = 1
+fs.file-max                               = 2097152
+fs.nr_open                                = 2097152
+fs.inotify.max_user_instances             = 8192
+fs.inotify.max_queued_events              = 16384
+vm.max_map_count                          = 262144
+net.core.netdev_max_backlog               = 16384
+net.ipv4.tcp_wmem                         = 4096 12582912 16777216
+net.core.wmem_max                         = 16777216
+net.core.somaxconn                        = 32768
+net.ipv4.tcp_timestamps                   = 0
+net.ipv4.tcp_max_syn_backlog              = 8096
+net.bridge.bridge-nf-call-arptables       = 1
+net.ipv4.tcp_rmem                         = 4096 12582912 16777216
+vm.swappiness                             = 0
+kernel.sysrq                              = 1
+net.ipv4.neigh.default.gc_stale_time      = 120
+net.ipv4.conf.all.rp_filter               = 0
+net.ipv4.conf.default.rp_filter           = 0
+net.ipv4.conf.default.arp_announce        = 2
+net.ipv4.conf.lo.arp_announce             = 2
+net.ipv4.conf.all.arp_announce            = 2
+net.ipv4.tcp_max_tw_buckets               = 5000
+net.ipv4.tcp_syncookies                   = 1
+net.ipv4.tcp_synack_retries               = 2
+# net.ipv6.conf.lo.disable_ipv6            = 1
+# net.ipv6.conf.all.disable_ipv6           = 1
+# net.ipv6.conf.default.disable_ipv6       = 1
+net.ipv4.ip_local_port_range              = 1024 65535
+net.ipv4.tcp_keepalive_time               = 600
+net.ipv4.tcp_keepalive_probes             = 10
+net.ipv4.tcp_keepalive_intvl              = 30
+net.nf_conntrack_max                      = 25000000
+net.netfilter.nf_conntrack_max            = 25000000
+net.netfilter.nf_conntrack_tcp_timeout_established = 180
+net.netfilter.nf_conntrack_tcp_timeout_time_wait   = 120
+net.netfilter.nf_conntrack_tcp_timeout_close_wait  = 60
+net.netfilter.nf_conntrack_tcp_timeout_fin_wait    = 12
 EOF
+
 # 使配置生效:
 sysctl -p /etc/sysctl.d/99-kubernetes-cri.conf
 sysctl --system
+sysctl -p
 
-# 通过运行以下命令验证是否加载了`br_netfilter`，`overlay`模块：
+# 文件限制
+cp /etc/security/limits.conf{,back}
+cat >> /etc/security/limits.conf <<EOF
+*   soft    nofile  655350
+*   hard    nofile  655350
+*   soft    nproc   655350
+*   hard    nproc   655350
+*   soft    core    unlimited
+*   hard    core    unlimited
+EOF
+
+cp /etc/security/limits.d/20-nproc.conf{,back}
+sed -i "s#4096#655350#g" /etc/security/limits.d/20-nproc.conf
+
+cp /etc/profile{,back}
+cat >> /etc/profile <<EOF
+ulimit -u 65535
+ulimit -n 65535
+ulimit -d unlimited
+ulimit -m unlimited
+ulimit -s unlimited
+ulimit -v unlimited
+ulimit -t unlimited
+ulimit -c unlimited
+EOF
+
+## 加载内核
+
+if [ -f /etc/sysconfig/modules/k8s.modules ];then
+    rm -f /etc/sysconfig/modules/k8s.modules
+fi
+
+touch /etc/sysconfig/modules/k8s.modules
+chmod +x /etc/sysconfig/modules/k8s.modules
+
+cat > ipvs.sh <<EOF
+ipvs_mods_dir="/usr/lib/modules/$(uname -r)/kernel/net/netfilter/ipvs"
+for i in \$(ls \$ipvs_mods_dir|grep -o "^[^.]*" )
+do
+  /sbin/modinfo -F filename \$i &>/dev/null
+  if [ \$? -eq 0 ];then
+        /sbin/modprobe \$i
+        echo "/sbin/modprobe \$i" >> /etc/sysconfig/modules/k8s.modules
+  fi
+done
+EOF
+
+source ipvs.sh
+cat /etc/sysconfig/modules/k8s.modules
+
 ehco "通过运行以下命令验证是否加载了`br_netfilter`，`overlay`模块"
 lsmod | grep br_netfilter
 lsmod | grep overlay
 
-# IPVS 待测试
-#apt install ipset ipvsadm -y
-#
-#mkdir -p /etc/sysconfig/ipvsadm
-#cat > /etc/sysconfig/ipvsadm/ipvs.modules <<EOF
-##!/bin/bash
-#modprobe -- ip_vs
-#modprobe -- ip_vs_rr
-#modprobe -- ip_vs_wrr
-#modprobe -- ip_vs_sh
-#modprobe -- nf_conntrack
-#EOF
-# 授权、运行、检查是否加载
-#chmod 755 /etc/sysconfig/ipvsadm/ipvs.modules && bash /etc/sysconfig/ipvsadm/ipvs.modules && lsmod | grep -e ip_vs -e nf_conntrack
+apt install ipset ipvsadm -y
 
-# 由于ipvs已经加入到了内核的主干，所以为kube-proxy开启ipvs的前提需要加载以下的内核模块：
-#cat > /etc/modules-load.d/ipvs.conf << EOF
-#ip_vs
-#ip_vs_rr
-#ip_vs_wrr
-#ip_vs_sh
-#nf_conntrack
-#EOF
-#modprobe ip_vs
-#modprobe ip_vs_rr
-#modprobe ip_vs_wrr
-#modprobe ip_vs_sh
 # 使用命令查看是否已经正确加载所需的内核模块:
-#lsmod | grep -e ip_vs -e nf_conntrack
+lsmod | grep -e ip_vs -e nf_conntrack
 
-#systemctl restart systemd-modules-load.service
-#
-#lsmod | grep -e ip_vs -e nf_conntrack
-#cut -f1 -d " "  /proc/modules | grep -e ip_vs -e nf_conntrack
+cut -f1 -d " "  /proc/modules | grep -e ip_vs -e nf_conntrack
 
 echo "/etc/sysctl.d/99-kubernetes-cri.conf:"
 cat /etc/sysctl.d/99-kubernetes-cri.conf
@@ -182,4 +222,4 @@ cat /etc/sysctl.d/99-kubernetes-cri.conf
 #echo "blkid | grep swap: 为空就正常"
 #sudo blkid | grep swap
 
-set +x
+#set +x

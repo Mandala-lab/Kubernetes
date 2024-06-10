@@ -25,7 +25,7 @@ unset https_proxy
 
 # 安装 kubeadm、kubelet
 sudo apt install -y apt-transport-https ca-certificates curl
-VERSION="v1.29"
+VERSION="v1.30"
 echo "deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/$VERSION/deb/ /" \
 | sudo tee /etc/apt/sources.list.d/kubernetes.list
 

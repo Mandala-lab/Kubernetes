@@ -111,7 +111,7 @@ containerd config default | tee /etc/containerd/config.toml
 sed -i "s#SystemdCgroup\ \=\ false#SystemdCgroup\ \=\ true#g" /etc/containerd/config.toml
 cat /etc/containerd/config.toml | grep SystemdCgroup
 sed -i "s#registry.k8s.io#m.daocloud.io/registry.k8s.io#g" /etc/containerd/config.toml
-cat /etc/containerd/config.toml | grep sandbox_image
+cat /etc/containerd/config.toml | grep sandbox
 
 # 配置加速器
 # SystemdCgroup参数是containerd中的一个配置参数，用于设置containerd在运行过程中使用的Cgroup（控制组）路径。

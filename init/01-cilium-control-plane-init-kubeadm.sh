@@ -25,7 +25,8 @@ ls /var/run/containerd/
 ls /run/containerd/
 
 # 查看默认的kubelet的配置
-kubeadm config print init-defaults --component-configs KubeletConfiguration
+kubeadm config print init-defaults --component-configs \
+KubeProxyConfiguration,KubeletConfiguration > kubeadm-config.yaml
 
 # 预检
 netstat -tuln | grep 6443

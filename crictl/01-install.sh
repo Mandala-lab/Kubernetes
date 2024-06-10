@@ -3,7 +3,7 @@
 # 删除之前的
 rm -rf /etc/crictl.yaml
 
-export CRICTL_VERSION="v1.29.0"
+export CRICTL_VERSION="v1.30.0"
 
 ARCH=""
 # 使用uname -m获取架构信息
