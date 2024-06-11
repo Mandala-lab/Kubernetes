@@ -1,3 +1,29 @@
+#!/usr/bin/env bash
+# 启用 POSIX 模式并设置严格的错误处理机制
+set -o posix errexit -o pipefail
+
+MASTER_HOST_IP="43.224.225.49"
+MASTER_HOST_PORT=6443
+CONTROL_PLANE_ENDPOINT=$MASTER_HOST_IP:$MASTER_HOST_PORT
+MASTER_NODE_NAME="node5"
+CERT_SA_NS=(43.224.225.49 43.224.225.110 159.75.231.54 node1 node5 node6)
+KUBERNETES_VERSION="1.30.1"
+IMAGE_REPOSITORY=""
+POD_SUBNET="10.10.10.0/17"
+SERVICE_SUBNET="10.10.0.0/20"
+
+# 初始化 certSANs 变量
+certSANs="["
+
+# 循环遍历数组，为每个元素添加引号并用逗号分隔
+for ip in "${CERT_SA_NS[@]}"; do
+    certSANs+=" \"$ip\","
+done
+
+# 移除最后一个逗号并关闭括号
+certSANs="${certSANs%,} ]"
+
+cat > kubeadm-init-conf.yaml <<EOF
 apiVersion: kubeadm.k8s.io/v1beta3
 kind: InitConfiguration
 bootstrapTokens:
@@ -11,11 +37,11 @@ bootstrapTokens:
 #      - authentication # 用于身份验证
 localAPIEndpoint:
   # masterIP 主节点用于广播的地址
-  advertiseAddress: 192.168.3.161
+  advertiseAddress: $MASTER_HOST_IP
   # Kubernetes API 服务器监听的端口
-  bindPort: 6443
+  bindPort: $MASTER_HOST_PORT
 nodeRegistration:
-  name: "node-161" # 该控制节点的名称, 也就是出现在kubectl get no的名称
+  name: $MASTER_NODE_NAME # 该控制节点的名称, 也就是出现在kubectl get no的名称
   # CRI（容器运行时接口）的通信 socket 用来读取容器运行时的信息。 此信息会被以注解的方式添加到 Node API 对象至上，用于后续用途。
   criSocket: unix:///var/run/containerd/containerd.sock
   # 镜像拉取策略。 这两个字段的值必须是 "Always"、"Never" 或 "IfNotPresent" 之一。 默认值是 "IfNotPresent"，也是添加此字段之前的默认行为
@@ -30,14 +56,8 @@ nodeRegistration:
 ---
 apiServer:
   # certSANs 设置 API 服务器签署证书所用的额外主题替代名（Subject Alternative Name，SAN）。
-  certSANs:
-    # 集群中各个节点的 IP 地址、域名、负载均衡、或者集群的公共访问地址作为 certSANs 字段的值
-    - 192.168.3.161
-    - 192.168.3.162
-    - 192.168.3.163
-    - "node-161"
-    - "node-162"
-    - "node-163"
+  # 集群中各个节点的 IP 地址、域名、负载均衡、或者集群的公共访问地址作为 certSANs 字段的值
+  certSANs: $certSANs
   extraArgs:
     # API 服务器的授权模式
     authorization-mode: Node,RBAC
@@ -52,7 +72,7 @@ apiServer:
 apiVersion: kubeadm.k8s.io/v1beta3
 kind: ClusterConfiguration
 # 版本信息
-kubernetesVersion: 1.29.2
+kubernetesVersion: $KUBERNETES_VERSION
 # 证书目录路径
 certificatesDir: /etc/kubernetes/pki
 # 集群名称。
@@ -81,8 +101,10 @@ etcd:
 #   caFile: "/etcd/kubernetes/pki/etcd/etcd-ca.crt"
 #   certFile: "/etcd/kubernetes/pki/etcd/etcd.crt"
 #   keyFile: "/etcd/kubernetes/pki/etcd/etcd.key"
-imageRepository: registry.cn-hangzhou.aliyuncs.com/google_containers # 镜像源
+
+#imageRepository: registry.cn-hangzhou.aliyuncs.com/google_containers # 镜像源
 #imageRepository: registry.aliyuncs.com/google_containers # 镜像源
+
 # 为控制面设置一个稳定的 IP 地址或 DNS 名称。
 # 取值可以是一个合法的 IP 地址或者 RFC-1123 形式的 DNS 子域名，二者均可以带一个 可选的 TCP 端口号。
 # 如果 controlPlaneEndpoint 未设置，则使用 advertiseAddress + bindPort。 如果设置了 controlPlaneEndpoint，但未指定 TCP 端口号，则使用 bindPort。
@@ -90,7 +112,7 @@ imageRepository: registry.cn-hangzhou.aliyuncs.com/google_containers # 镜像源
 # 在一个包含不止一个控制面实例的集群中，该字段应该设置为放置在控制面 实例之前的外部负载均衡器的地址。
 # 在带有强制性节点回收的环境中，controlPlaneEndpoint 可以用来 为控制面设置一个稳定的 DNS。
 # 负载均衡地址或者master的主机
-controlPlaneEndpoint: "192.168.3.161:6443"
+controlPlaneEndpoint: $CONTROL_PLANE_ENDPOINT
 # 其中包含集群的网络拓扑配置。使用这一部分可以定制 Pod 的 子网或者 Service 的子网。
 networking:
   # Kubernetes 服务所使用的的 DNS 域名。 默认值为 "cluster.local"。
@@ -98,13 +120,11 @@ networking:
   # 为 Pod 所使用的子网 默认为: 10.244.0.0/16
   # 10.10.0.0到10.10.63.255，共有16384个IP地址
   # 如果是flannel插件, 需要修改flannel的yaml文件的net-conf.json为当前的podSubnet值
-  #  podSubnet: "10.10.0.0/18"
-  podSubnet: "10.10.0.0/17"
+  podSubnet: $POD_SUBNET
   # Kubernetes 服务所使用的的子网。 默认值为 "10.96.0.0/12"
   # 10.10.0.0/17的范围是从10.10.0.0到10.10.127.255，共有32768个IP地址可以包含pod和svc的范围
   # 10.10.66.0/20的范围是从10.10.64.0到10.10.79.255，共有4096个IP地址
-  #serviceSubnet: "10.10.66.0/20"
-  serviceSubnet: "10.10.0.0/17"
+  serviceSubnet: $SERVICE_SUBNET
 # 调度器配置
 scheduler: { }
 ---
@@ -130,4 +150,5 @@ cgroupDriver: systemd
 apiVersion: kubeproxy.config.k8s.io/v1alpha1
 kind: KubeProxyConfiguration
 # kube-proxy specific options here
-mode: "ipvs"
+mode: ipvs
+EOF

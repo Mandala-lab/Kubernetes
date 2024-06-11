@@ -85,8 +85,10 @@ etcd:
 #   caFile: "/etcd/kubernetes/pki/etcd/etcd-ca.crt"
 #   certFile: "/etcd/kubernetes/pki/etcd/etcd.crt"
 #   keyFile: "/etcd/kubernetes/pki/etcd/etcd.key"
-imageRepository: registry.cn-hangzhou.aliyuncs.com/google_containers # 镜像源
+
+#imageRepository: registry.cn-hangzhou.aliyuncs.com/google_containers # 镜像源
 #imageRepository: registry.aliyuncs.com/google_containers # 镜像源
+
 # 为控制面设置一个稳定的 IP 地址或 DNS 名称。
 # 取值可以是一个合法的 IP 地址或者 RFC-1123 形式的 DNS 子域名，二者均可以带一个 可选的 TCP 端口号。
 # 如果 controlPlaneEndpoint 未设置，则使用 advertiseAddress + bindPort。 如果设置了 controlPlaneEndpoint，但未指定 TCP 端口号，则使用 bindPort。
@@ -102,14 +104,11 @@ networking:
   # 为 Pod 所使用的子网 默认为: 10.244.0.0/16
   # 10.10.0.0到10.10.63.255，共有16384个IP地址
   # 如果是flannel插件, 需要修改flannel的yaml文件的net-conf.json为当前的podSubnet值
-  podSubnet: "10.10.64.0/18"
-  #  podSubnet: "10.10.0.0/18"
-  #  podSubnet: "10.10.0.0/17"
+  podSubnet: "10.10.10.0/17"
   # Kubernetes 服务所使用的的子网。 默认值为 "10.96.0.0/12"
   # 10.10.0.0/17的范围是从10.10.0.0到10.10.127.255，共有32768个IP地址可以包含pod和svc的范围
   # 10.10.66.0/20的范围是从10.10.64.0到10.10.79.255，共有4096个IP地址
   serviceSubnet: "10.10.0.0/20"
-  #serviceSubnet: "10.10.0.0/17"
 # 调度器配置
 scheduler: { }
 ---

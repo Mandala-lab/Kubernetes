@@ -7,7 +7,7 @@ set -x
 # Containerd -> runc
 # 少数情况下, 系统可能没有安装runc或者配置不正确
 # TODO 切换为动态获取
-VERSION="v1.1.11"
+VERSION="v1.1.12"
 
 ARCH=""
 # 使用uname -m获取架构信息

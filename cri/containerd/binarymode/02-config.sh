@@ -92,5 +92,6 @@ grep -nE "sandbox_image|SystemdCgroup" "$CONTAINERD_CONFIG_FILE_PATH"
 cat /etc/modules-load.d/containerd.conf
 
 ctr -v
+which containerd
 
 #set +x

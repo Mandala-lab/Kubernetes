@@ -9,12 +9,13 @@ cd $HOME || exit
 # 获取当前版本的Kubernetes组件的镜像列表
 # 并且替换为国内的阿里云镜像进行下载
 #VERSION=$(curl -L -s https://dl.k8s.io/release/stable.txt)
-## registry.cn-hangzhou.aliyuncs.com/google_containers
-#kubeadm config images list --kubernetes-version $VERSION \
-#| sed 's|registry.k8s.io|crictl pull registry.aliyuncs.com/google_containers|g' \
-#> download_images.sh
-#
-#sudo sh download_images.sh
+ VERSION=v1.30.1
+# registry.cn-hangzhou.aliyuncs.com/google_containers
+kubeadm config images list --kubernetes-version $VERSION \
+| sed 's|registry.k8s.io|crictl pull registry.aliyuncs.com/google_containers|g' \
+> download_images.sh
+
+sudo sh download_images.sh
 
 # coredns/coredns:v1.11.1和pause:3.9一般都下载失败, 因为阿里云镜像没有. 需要手动从registry.k8s.io下载
 # 也可以跳过该步骤, 因为init也会自动下载, 而且init阶段却很奇怪的就可以下载成功, 有兴趣可以研究

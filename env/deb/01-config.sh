@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-#set -x
+set -x
 
 apt update -y
 # -e：如果任何命令的退出状态是非零值，脚本将立即退出。
@@ -64,9 +64,9 @@ ntpdate time.windows.com
 
 # 修改Hosts
 #cat >> /etc/hosts << EOF
-#192.168.3.161 node-161
-#192.168.3.162 node-162
-#192.168.3.163 node-163
+#192.168.3.160 node-160
+#192.168.3.100 node-100
+#192.168.3.152 node-152
 #EOF
 
 # systemd-resolved
@@ -103,65 +103,128 @@ sudo blkid | grep swap
 # net.bridge.bridge-nf-call-ip6tables : 启用控制 IPv6 数据包经过桥接时是否要经过 ip6tables 过滤
 # net.ipv4.ip_forward                 : 启用 IPv4 数据包的转发功能
 cat <<EOF | sudo tee /etc/sysctl.d/99-kubernetes-cri.conf
-net.bridge.bridge-nf-call-iptables  = 1
-net.bridge.bridge-nf-call-ip6tables = 1
-net.ipv4.ip_forward                 = 1
+net.bridge.bridge-nf-call-iptables        = 1
+net.bridge.bridge-nf-call-ip6tables       = 1
+net.ipv4.ip_forward                       = 1
+net.ipv4.tcp_slow_start_after_idle        = 0
+net.core.rmem_max                         = 16777216
+fs.inotify.max_user_watches               = 524288
+kernel.softlockup_all_cpu_backtrace       = 1
+kernel.softlockup_panic                   = 1
+fs.file-max                               = 2097152
+fs.nr_open                                = 2097152
+fs.inotify.max_user_instances             = 8192
+fs.inotify.max_queued_events              = 16384
+vm.max_map_count                          = 262144
+net.core.netdev_max_backlog               = 16384
+net.ipv4.tcp_wmem                         = 4096 12582912 16777216
+net.core.wmem_max                         = 16777216
+net.core.somaxconn                        = 32768
+net.ipv4.tcp_timestamps                   = 0
+net.ipv4.tcp_max_syn_backlog              = 8096
+net.bridge.bridge-nf-call-arptables       = 1
+net.ipv4.tcp_rmem                         = 4096 12582912 16777216
+vm.swappiness                             = 0
+kernel.sysrq                              = 1
+net.ipv4.neigh.default.gc_stale_time      = 120
+net.ipv4.conf.all.rp_filter               = 0
+net.ipv4.conf.default.rp_filter           = 0
+net.ipv4.conf.default.arp_announce        = 2
+net.ipv4.conf.lo.arp_announce             = 2
+net.ipv4.conf.all.arp_announce            = 2
+net.ipv4.tcp_max_tw_buckets               = 5000
+net.ipv4.tcp_syncookies                   = 1
+net.ipv4.tcp_synack_retries               = 2
+# net.ipv6.conf.lo.disable_ipv6            = 1
+# net.ipv6.conf.all.disable_ipv6           = 1
+# net.ipv6.conf.default.disable_ipv6       = 1
+net.ipv4.ip_local_port_range              = 1024 65535
+net.ipv4.tcp_keepalive_time               = 600
+net.ipv4.tcp_keepalive_probes             = 10
+net.ipv4.tcp_keepalive_intvl              = 30
+net.nf_conntrack_max                      = 25000000
+net.netfilter.nf_conntrack_max            = 25000000
+net.netfilter.nf_conntrack_tcp_timeout_established = 180
+net.netfilter.nf_conntrack_tcp_timeout_time_wait   = 120
+net.netfilter.nf_conntrack_tcp_timeout_close_wait  = 60
+net.netfilter.nf_conntrack_tcp_timeout_fin_wait    = 12
 EOF
-# 使配置生效:
-sysctl -p /etc/sysctl.d/99-kubernetes-cri.conf
-sysctl --system
 
-# 通过运行以下命令验证是否加载了`br_netfilter`，`overlay`模块：
-mkdir -p /etc/sysconfig/modules
-cat > /etc/sysconfig/modules/k8s.modules << EOF
-modprobe br_netfilter
-modprobe ip_conntrack
-modprobe overlay
+# 使配置生效:
+sysctl --system
+sysctl -p
+
+# 文件限制
+cp /etc/security/limits.conf{,back}
+cat >> /etc/security/limits.conf <<EOF
+*   soft    nofile  655350
+*   hard    nofile  655350
+*   soft    nproc   655350
+*   hard    nproc   655350
+*   soft    core    unlimited
+*   hard    core    unlimited
 EOF
+
+cat /etc/security/limits.conf
+
+cp /etc/security/limits.d/20-nproc.conf{,back}
+sed -i "s#4096#655350#g" /etc/security/limits.d/20-nproc.conf
+
+cp /etc/profile{,back}
+cat >> /etc/profile <<EOF
+ulimit -u 65535
+ulimit -n 65535
+ulimit -d unlimited
+ulimit -m unlimited
+ulimit -s unlimited
+ulimit -v unlimited
+ulimit -t unlimited
+ulimit -c unlimited
+EOF
+
+cat /etc/profile
+
+## 加载内核
+
+if [ -f /etc/sysconfig/modules/k8s.modules ];then
+    rm -f /etc/sysconfig/modules/k8s.modules
+fi
+
+mkdir -pv /etc/sysconfig/modules
+touch /etc/sysconfig/modules/k8s.modules
+chmod +x /etc/sysconfig/modules/k8s.modules
+
+cat > ipvs.sh <<EOF
+ipvs_mods_dir="/usr/lib/modules/$(uname -r)/kernel/net/netfilter/ipvs"
+for i in \$(ls \$ipvs_mods_dir|grep -o "^[^.]*" )
+do
+  /sbin/modinfo -F filename \$i &>/dev/null
+  if [ \$? -eq 0 ];then
+        /sbin/modprobe \$i
+        echo "/sbin/modprobe \$i" >> /etc/sysconfig/modules/k8s.modules
+  fi
+done
+EOF
+
+source ipvs.sh
+cat /etc/sysconfig/modules/k8s.modules
 
 ehco "通过运行以下命令验证是否加载了`br_netfilter`，`overlay`模块"
 lsmod | grep br_netfilter
 lsmod | grep overlay
 
-# IPVS 待测试
 apt install ipset ipvsadm -y
 
-mkdir -p /etc/sysconfig/ipvsadm
-cat > /etc/sysconfig/ipvsadm/ipvs.modules <<EOF
-#!/bin/bash
-modprobe -- ip_vs
-modprobe -- ip_vs_rr
-modprobe -- ip_vs_wrr
-modprobe -- ip_vs_sh
-modprobe -- nf_conntrack
-EOF
-# 授权、运行、检查是否加载
-chmod 755 /etc/sysconfig/ipvsadm/ipvs.modules && bash /etc/sysconfig/ipvsadm/ipvs.modules && lsmod | grep -e ip_vs -e nf_conntrack
-
-# 由于ipvs已经加入到了内核的主干，所以为kube-proxy开启ipvs的前提需要加载以下的内核模块：
-cat > /etc/modules-load.d/ipvs.conf << EOF
-ip_vs
-ip_vs_rr
-ip_vs_wrr
-ip_vs_sh
-nf_conntrack
-EOF
-modprobe ip_vs
-modprobe ip_vs_rr
-modprobe ip_vs_wrr
-modprobe ip_vs_sh
 # 使用命令查看是否已经正确加载所需的内核模块:
 lsmod | grep -e ip_vs -e nf_conntrack
 
-systemctl restart systemd-modules-load.service
-
-lsmod | grep -e ip_vs -e nf_conntrack
 cut -f1 -d " "  /proc/modules | grep -e ip_vs -e nf_conntrack
 
 echo "/etc/sysctl.d/99-kubernetes-cri.conf:"
 cat /etc/sysctl.d/99-kubernetes-cri.conf
-
+cat /etc/security/limits.conf
+cat /etc/profile
 #echo "blkid | grep swap: 为空就正常"
 #sudo blkid | grep swap
 
-#set +x
+set +x
