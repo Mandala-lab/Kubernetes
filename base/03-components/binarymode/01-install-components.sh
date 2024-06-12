@@ -216,7 +216,10 @@ else
 fi
 
 # 配置 cgroup 驱动与CRI一致
-cp /etc/sysconfig/kubelet{,.back}
+if [ -f /etc/sysconfig/kubelet ];then
+  cp /etc/sysconfig/kubelet{,.back}
+fi
+
 cat > /etc/sysconfig/kubelet <<EOF
 KUBELET_EXTRA_ARGS="--cgroup-driver=systemd"
 EOF

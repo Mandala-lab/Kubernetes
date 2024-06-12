@@ -174,7 +174,10 @@ sysctl --system
 sysctl -p
 
 # 文件限制
-cp /etc/security/limits.conf{,.back}
+if [ -f /etc/security/limits.conf ];then
+  cp /etc/security/limits.conf{,.back}
+fi
+
 cat >> /etc/security/limits.conf <<EOF
 *   soft    nofile  655350
 *   hard    nofile  655350
@@ -186,7 +189,10 @@ EOF
 
 cat /etc/security/limits.conf
 
-cp /etc/security/limits.d/20-nproc.conf{,.back}
+if [ -f /etc/security/limits.d/20-nproc.conf ];then
+  cp /etc/security/limits.d/20-nproc.conf{,.back}
+fi
+
 sed -i "s#4096#655350#g" /etc/security/limits.d/20-nproc.conf
 
 cp /etc/profile{,.back}
