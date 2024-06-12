@@ -239,7 +239,7 @@ EOF
 source ./ipvs.sh
 cat /etc/sysconfig/modules/k8s.modules
 
-ehco "通过运行以下命令验证是否加载了`overlay`模块"
+echo "通过运行以下命令验证是否加载了`overlay`模块"
 
 lsmod | grep overlay
 
