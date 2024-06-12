@@ -16,7 +16,7 @@ while [ "$#" -gt 0 ]; do
         --proxy=*)
             value="${1#*=}"  # 提取等号后的值
             if [ "$value" = "y" ]; then
-                github_proxy="https://mirrors.chenby.cn/"
+                github_proxy="https://mirror.ghproxy.com/"
             elif [ "$value" = "n" ]; then
                 github_proxy=""
             else
