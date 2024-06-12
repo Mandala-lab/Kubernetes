@@ -1,33 +1,74 @@
 #!/usr/bin/env bash
 # 启用 POSIX 模式并设置严格的错误处理机制
-set -o posix -o errexit -o pipefail
+set -o posix -o errexit -o pipefail -x
 
-# 清除旧安装
-systemctl stop kubeadm
-systemctl stop kubelet
-systemctl stop kubectl
-sudo apt purge -y kubeadm kubectl kubelet kubernetes-cni kube*
-sudo apt-mark unhold kubeadm
-sudo apt-mark unhold kubelet
-sudo apt-mark unhold kubectl
-sudo apt remove -y kubeadm kubelet kubectl
-rm -rf /usr/local/bin/kube*
-rm -rf /usr/bin/kube*
-rm -rf /var/lib/kube*
-rm -rf /etc/sysconfig/kubelet
-rm -rf /etc/kubernetes
-rm -rf /etc/apt/sources.list.d/kubernetes.list
-rm -rf /usr/lib/systemd/system/kubelet.service.d/10-kubeadm.confkub
-sudo apt autoremove -y
+# 函数：显示错误消息并退出
+error_exit() {
+    echo "Error: Invalid argument value for $1. Expected 'y' or 'n'."
+    exit 1
+}
+
+# 解析命令行参数
+remove=""
+VERSION=""
+while [ "$#" -gt 0 ]; do
+    case "$1" in
+        --remove=*)
+            value="${1#*=}"  # 提取等号后的值
+            if [ "$value" = "y" ]; then
+                remove="y"
+            elif [ "$value" = "n" ]; then
+                remove="n"
+            else
+                error_exit "$1"
+            fi
+            shift
+            ;;
+        --version=*)
+            VERSION="${1#*=}"  # 提取等号后的值
+            shift
+            ;;
+    esac
+done
+
+# 是否清除旧安装
+if [ $remove = "y" ]; then
+  systemctl stop kubeadm
+  systemctl stop kubelet
+  systemctl stop kubectl
+  sudo apt purge -y kubeadm kubectl kubelet kubernetes-cni kube*
+  sudo apt-mark unhold kubeadm
+  sudo apt-mark unhold kubelet
+  sudo apt-mark unhold kubectl
+  sudo apt remove -y kubeadm kubelet kubectl
+  rm -rf /usr/local/bin/kube*
+  rm -rf /usr/bin/kube*
+  rm -rf /var/lib/kube*
+  rm -rf /etc/sysconfig/kubelet
+  rm -rf /etc/kubernetes
+  rm -rf /etc/apt/sources.list.d/kubernetes.list
+  rm -rf /usr/lib/systemd/system/kubelet.service.d/10-kubeadm.confkub
+  sudo apt autoremove -y
+fi
+
+# 输出用户定义的Kubernetes版本
+echo "version: $VERSION"
+if [ "$VERSION" = "" ]; then
+ VERSION="v1.30"
+fi
 
 unset http_proxy
 unset https_proxy
 
 # 安装 kubeadm、kubelet
 sudo apt install -y apt-transport-https ca-certificates curl
-VERSION="v1.30"
+
 echo "deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/$VERSION/deb/ /" \
 | sudo tee /etc/apt/sources.list.d/kubernetes.list
+
+if [ -f /etc/apt/keyrings/kubernetes-apt-keyring.gpg ];then
+  rm -rf /etc/apt/keyrings/kubernetes-apt-keyring.gpg
+fi
 
 mkdir -p /etc/apt/keyrings/
 curl -fsSL https://pkgs.k8s.io/core:/stable:/$VERSION/deb/Release.key | sudo gpg --dearmor -o /etc/apt/keyrings/kubernetes-apt-keyring.gpg
@@ -38,11 +79,15 @@ curl -fsSL https://pkgs.k8s.io/core:/stable:/$VERSION/deb/Release.key | sudo gpg
 # E: Sub-process https received signal 4.
 # GNUTLS_CPUID_OVERRIDE=0x1 apt update -y
 apt update -y
-# GNUTLS_CPUID_OVERRIDE=0x1 apt install -y containerd conntrack socat kubelet kubeadm kubectl
-apt install -y containerd conntrack socat kubelet kubeadm
+# GNUTLS_CPUID_OVERRIDE=0x1 apt install -y conntrack socat kubelet kubeadm kubectl
+apt install -y conntrack socat kubelet kubeadm
 
 # 配置 cgroup 驱动与CRI一致
-cp /etc/sysconfig/kubelet{,.back}
+if [ -f /etc/sysconfig/kubelet ];then
+  cp /etc/sysconfig/kubelet{,.back}
+fi
+
+mkdir -p /etc/sysconfig
 cat > /etc/sysconfig/kubelet <<EOF
 KUBELET_EXTRA_ARGS="--cgroup-driver=systemd"
 EOF
@@ -59,7 +104,7 @@ systemctl daemon-reload
 systemctl enable --now kubelet
 #systemctl status kubelet
 
-systemctl restart containerd
+systemctl restart
 
 kubeadm version
 kubelet --version
@@ -82,5 +127,3 @@ kubectl version --client
 # 虽然没有 IPVS 代理规则或出现以下日志，但表明 kube-proxy 无法使用 IPVS 模式：
 # Can't use ipvs proxier, trying iptables proxier
 # Using iptables Proxier.
-
-#set +x

@@ -94,4 +94,4 @@ cat /etc/modules-load.d/containerd.conf
 ctr -v
 which containerd
 
-#set +x
+

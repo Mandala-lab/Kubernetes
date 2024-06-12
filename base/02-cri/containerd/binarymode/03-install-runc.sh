@@ -81,4 +81,3 @@ rm -rf ./runc.${ARCH}
 echo "url:$url"
 
 runc -v
-
