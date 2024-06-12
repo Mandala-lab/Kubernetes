@@ -207,6 +207,7 @@ EOF
 systemctl restart chronyd ; systemctl enable chronyd
 
 ulimit -SHn 65535
+
 cat >> /etc/security/limits.conf <<EOF
 * soft nofile 655360
 * hard nofile 131072

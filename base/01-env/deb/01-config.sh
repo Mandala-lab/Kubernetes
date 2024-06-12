@@ -3,11 +3,18 @@
 set -o posix -o errexit -o pipefail
 
 # 运行前清理
-mv /etc/security/limits.conf{.back,}
-mv /etc/security/limits.d/20-nproc.conf{.back,}
-mv /etc/profile{.back,}
-mv /etc/hosts{.back,}
-cp /etc/fstab{.back,}
+if [ -f /etc/security/limits.conf.back ];then
+  mv /etc/security/limits.d/20-nproc.conf{.back,}
+fi
+if [ -f /etc/profile.back ];then
+  mv /etc/profile{.back,}
+fi
+if [ -f /etc/hosts.back ];then
+  mv /etc/hosts{.back,}
+fi
+if [ -f /etc/fstab.back ];then
+  cp /etc/fstab{.back,}
+fi
 
 rm -rf /etc/sysctl.d/99-kubernetes-cri.conf
 
