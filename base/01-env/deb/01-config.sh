@@ -4,7 +4,7 @@ set -o posix -o errexit -o pipefail
 
 # 运行前清理
 if [ -f /etc/security/limits.conf.back ];then
-  mv /etc/security/limits.d/20-nproc.conf{.back,}
+  mv /etc/security/limits.conf{.back,}
 fi
 if [ -f /etc/profile.back ];then
   mv /etc/profile{.back,}
