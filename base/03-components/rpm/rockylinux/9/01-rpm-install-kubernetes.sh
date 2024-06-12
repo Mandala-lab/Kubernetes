@@ -19,7 +19,7 @@ vpnon
 # runc
 VERSION="v1.1.12"
 ARCH="arm64"
-wget https://github.com/opencontainers/runc/releases/download/${VERSION}/runc.${ARCH}
+wget -t 2 -T 240 -N -S –progress=TYPE https://github.com/opencontainers/runc/releases/download/${VERSION}/runc.${ARCH}
 cp runc.${ARCH} /usr/local/sbin/runc
 chmod 755 /usr/local/sbin/runc
 cp -p /usr/local/sbin/runc /usr/local/bin/runc
@@ -35,7 +35,7 @@ yum install -y conntrack
 
 CONTAINERD_VERSION='1.7.13'
 ARCH="arm64"
-wget https://github.com/containerd/containerd/releases/download/${CONTAINERD_VERSION}/containerd-${CONTAINERD_VERSION}-linux-${ARCH}.tar.gz
+wget -t 2 -T 240 -N -S –progress=TYPE https://github.com/containerd/containerd/releases/download/${CONTAINERD_VERSION}/containerd-${CONTAINERD_VERSION}-linux-${ARCH}.tar.gz
 tar Czvf containerd-*-linux-arm64.tar.gz /usr/local
 
 cat > /etc/systemd/system/containerd.service <<EOF
@@ -130,7 +130,7 @@ EOF
 
 
 #cni_plugins_version='v1.4.0'
-#wget https://github.com/containernetworking/plugins/releases/download/v1.4.0/cni-plugins-linux-arm64-v1.4.0.tgz
+#wget -t 2 -T 240 -N -S –progress=TYPE https://github.com/containernetworking/plugins/releases/download/v1.4.0/cni-plugins-linux-arm64-v1.4.0.tgz
 
 # URLs
 base_url='https://mirrors.chenby.cn/https://github.com'
@@ -417,7 +417,7 @@ fi
 DOWNLOAD_DIR="/usr/bin"
 rm -rf /usr/lib/systemd/system/kubelet.service
 rm -rf /usr/lib/systemd/system/kubelet.service.d/10-kubeadm.conf
-if ! wget -q "https://raw.githubusercontent.com/kubernetes/release/${RELEASE_VERSION}/cmd/krel/templates/latest/kubelet/kubelet.service"; then
+if ! wget -t 2 -T 240 -N -S –progress=TYPE -q "https://raw.githubusercontent.com/kubernetes/release/${RELEASE_VERSION}/cmd/krel/templates/latest/kubelet/kubelet.service"; then
   echo "下载失败, 正在使用内置的文件进行替换, 但可能不是最新的, 可以进行手动替换"
   cat > /etc/systemd/system/kubelet.service <<EOF
 [Unit]
@@ -455,7 +455,7 @@ fi
 
 DOWNLOAD_DIR="/usr/local/bin"
 sudo mkdir -p /etc/systemd/system/kubelet.service.d
-if ! wget -q "https://raw.githubusercontent.com/kubernetes/release/${RELEASE_VERSION}/cmd/krel/templates/latest/kubeadm/10-kubeadm.conf"; then
+if ! wget -t 2 -T 240 -N -S –progress=TYPE -q "https://raw.githubusercontent.com/kubernetes/release/${RELEASE_VERSION}/cmd/krel/templates/latest/kubeadm/10-kubeadm.conf"; then
   echo "下载失败, 正在使用内置的文件进行替换, 但可能不是最新的, 可以进行手动替换"
   cat > /etc/systemd/system/kubelet.service.d/10-kubeadm.conf << EOF
 # Note: This dropin only works with kubeadm and kubelet v1.11+
@@ -487,7 +487,7 @@ cat /etc/systemd/system/kubelet.service.d/10-kubeadm.conf
 # crictl
 VERSION="v1.29.0"
 ARCH="arm64"
-wget https://github.com/kubernetes-sigs/cri-tools/releases/download/${VERSION}/crictl-${VERSION}-linux-${ARCH}.tar.gz
+wget -t 2 -T 240 -N -S –progress=TYPE https://github.com/kubernetes-sigs/cri-tools/releases/download/${VERSION}/crictl-${VERSION}-linux-${ARCH}.tar.gz
 
 tar xf crictl-$VERSION-linux-$ARCH.tar.gz -C /usr/bin/
 #生成配置文件
@@ -516,7 +516,7 @@ crictl info
 # ETCD https://github.com/etcd-io/etcd/releases/
 #VERSION="v3.5.12"
 #ARCH="arm64"
-#wget https://github.com/etcd-io/etcd/releases/download/${VERSION}/etcd-${VERSION}-linux-${ARCH}.tar.gz
+#wget -t 2 -T 240 -N -S –progress=TYPE https://github.com/etcd-io/etcd/releases/download/${VERSION}/etcd-${VERSION}-linux-${ARCH}.tar.gz
 #tar -zxvf etcd-${VERSION}-linux-${ARCH}.tar.gz
 #cp etcd-${VERSION}-linux-${ARCH}/etcd /usr/local/bin/
 #cp etcd-${VERSION}-linux-${ARCH}/etcdctl /usr/local/bin/
@@ -531,7 +531,7 @@ hash -r
 # helm
 VERSION="v3.13.2"
 ARCH="arm64"
-wget https://mirrors.huaweicloud.com/helm/${VERSION}/helm-${VERSION}-linux-${ARCH}.tar.gz
+wget -t 2 -T 240 -N -S –progress=TYPE https://mirrors.huaweicloud.com/helm/${VERSION}/helm-${VERSION}-linux-${ARCH}.tar.gz
 tar -zxvf helm-${VERSION}-linux-${ARCH}.tar.gz
 cp linux-$ARCH/helm /usr/local/bin/
 
@@ -616,11 +616,11 @@ helm install cilium cilium/cilium --namespace kube-system \
 kubectl  get pod -A | grep cil
 
 # 下载专属监控面板
-wget https://mirrors.chenby.cn/https://raw.githubusercontent.com/cilium/cilium/1.12.1/examples/kubernetes/addons/prometheus/monitoring-example.yaml
+wget -t 2 -T 240 -N -S –progress=TYPE https://mirrors.chenby.cn/https://raw.githubusercontent.com/cilium/cilium/1.12.1/examples/kubernetes/addons/prometheus/monitoring-example.yaml
 sed -i "s#docker.io/#m.daocloud.io/docker.io/#g" monitoring-example.yaml
 kubectl  apply -f monitoring-example.yaml
 
-wget https://mirrors.chenby.cn/https://raw.githubusercontent.com/cilium/cilium/master/examples/kubernetes/connectivity-check/connectivity-check.yaml
+wget -t 2 -T 240 -N -S –progress=TYPE https://mirrors.chenby.cn/https://raw.githubusercontent.com/cilium/cilium/master/examples/kubernetes/connectivity-check/connectivity-check.yaml
 
 # 说明 测试用例 需要在 安装CoreDNS 之后即可完成
 sed -i "s#google.com#baidu.cn#g" connectivity-check.yaml
@@ -634,7 +634,7 @@ kubectl get svc -A | grep hubble
 # Metrics-server
 # 在新版的Kubernetes中系统资源的采集均使用Metrics-server，可以通过Metrics采集节点和Pod的内存、磁盘、CPU和网络的使用率
 # 下载
-wget https://mirrors.chenby.cn/https://github.com/kubernetes-sigs/metrics-server/releases/latest/download/components.yaml
+wget -t 2 -T 240 -N -S –progress=TYPE https://mirrors.chenby.cn/https://github.com/kubernetes-sigs/metrics-server/releases/latest/download/components.yaml
 
 # 修改配置
 vim components.yaml
@@ -769,7 +769,7 @@ kubectl  apply -f dashboard-user.yaml
 kubectl -n kube-system create token admin-user
 
 # ingress安装
-wget https://mirrors.chenby.cn/https://raw.githubusercontent.com/kubernetes/ingress-nginx/main/deploy/static/provider/cloud/deploy.yaml
+wget -t 2 -T 240 -N -S –progress=TYPE https://mirrors.chenby.cn/https://raw.githubusercontent.com/kubernetes/ingress-nginx/main/deploy/static/provider/cloud/deploy.yaml
 
 # 修改为国内源 docker源可选
 sed -i "s#registry.k8s.io/#m.daocloud.io/registry.k8s.io/#g" *.yaml

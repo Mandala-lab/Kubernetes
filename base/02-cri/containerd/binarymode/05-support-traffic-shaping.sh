@@ -34,7 +34,7 @@ then
     echo "Go is installed."
 else
     echo "Go is not installed."
-    wget https://golang.google.cn/dl/go1.22.3.linux-${ARCH}.tar.gz
+    wget -t 2 -T 240 -N -S –progress=TYPE https://golang.google.cn/dl/go1.22.3.linux-${ARCH}.tar.gz
     tar -zxvf go1.22.3.linux-arm64.tar.gz -C /usr/local
     mv /usr/local/go/bin/* /usr/local/bin/
 fi

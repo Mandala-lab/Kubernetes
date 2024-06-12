@@ -17,7 +17,6 @@ fi
 # 删除之前的
 rm -rf /opt/containerd/
 rm -rf /usr/bin/ctr
-rm -rf /home/containerd
 rm -rf /etc/containerd/
 rm -rf $CONTAINERD_SERVICE
 rm -rf $CONTAINERD_CONFIG_FILE_PATH
@@ -52,7 +51,7 @@ if [ -f "containerd-$VERSION-linux-$ARCH.tar.gz" ]; then
     tar -zxvf containerd-$VERSION-linux-$ARCH.tar.gz -C /usr/local/
 else
     echo "文件不存在"
-    wget https://github.com/containerd/containerd/releases/download/v${VERSION}/containerd-${VERSION}-linux-${ARCH}.tar.gz
+    wget -t 2 -T 240 -N -S –progress=TYPE https://github.com/containerd/containerd/releases/download/v${VERSION}/containerd-${VERSION}-linux-${ARCH}.tar.gz
     tar -zxvf containerd-$VERSION-linux-$ARCH.tar.gz -C /usr/local/
 fi
 

@@ -21,7 +21,7 @@ else
     echo "请手动定义你的发行版的架构"
 fi
 echo $ARCH
-wget https://github.com/opencontainers/runc/releases/download/${VERSION}/runc.${ARCH}
+wget -t 2 -T 240 -N -S –progress=TYPE https://github.com/opencontainers/runc/releases/download/${VERSION}/runc.${ARCH}
 install -m 755 ./runc.${ARCH} /usr/local/sbin/runc
 
 rm -rf ./runc.${ARCH}

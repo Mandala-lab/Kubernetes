@@ -14,7 +14,7 @@ else
     echo "请手动定义你的发行版的架构"
 fi
 
-wget https://get.helm.sh/helm-v3.14.0-linux-"${ARCH}".tar.gz
+wget -t 2 -T 240 -N -S –progress=TYPE https://get.helm.sh/helm-v3.14.0-linux-"${ARCH}".tar.gz
 tar xf  helm-v3.14.0-linux-"${ARCH}".tar.gz
 mv linux-"${ARCH}"/helm /usr/bin/ && rm -rf linux-"${ARCH}"
 
