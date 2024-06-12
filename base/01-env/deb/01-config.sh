@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-set -x
+set -o posix errexit -o pipefail
 
 apt update -y
 # -e：如果任何命令的退出状态是非零值，脚本将立即退出。
@@ -84,10 +84,17 @@ systemctl restart systemd-resolved
 sed -i '/^\/.*swap/s/^/#/' /etc/fstab
 sudo mount -a
 sudo swapoff -a
-grep swap /etc/fstab
 
 # 检查是否存在swap分区
-sudo blkid | grep swap
+if grep swap /etc/fstab; then
+  echo "swap没有关闭, 建议关闭"
+  exit 1
+fi
+
+if sudo blkid | grep swap; then
+  echo "swap没有关闭, 建议关闭"
+  exit 1
+fi
 
 # https://kubernetes.io/zh-cn/docs/setup/production-environment/container-runtimes/
 # 使用kubeadm加入Kubernetes集群时要求net.bridge.bridge-nf-call-iptables=1参数值, 因为Kubernetes默认行为是依赖IPTables这个库
