@@ -79,7 +79,7 @@ curl -fsSL https://pkgs.k8s.io/core:/stable:/$VERSION/deb/Release.key | sudo gpg
 # E: Sub-process https received signal 4.
 # GNUTLS_CPUID_OVERRIDE=0x1 apt update -y
 apt update -y
-# GNUTLS_CPUID_OVERRIDE=0x1 apt install -y conntrack socat kubelet kubeadm kubectl
+# GNUTLS_CPUID_OVERRIDE=0x1 apt install -y conntrack socat kubelet kubeadm
 apt install -y conntrack socat kubelet kubeadm
 
 # 配置 cgroup 驱动与CRI一致
@@ -96,7 +96,7 @@ cat /usr/lib/systemd/system/kubelet.service.d/10-kubeadm.conf
 cat /etc/sysconfig/kubelet
 
 # 清理旧的安装信息
-which kubeadm kubelet kubectl
+which kubeadm kubelet
 hash -r
 
 systemctl daemon-reload
@@ -108,10 +108,6 @@ systemctl restart
 
 kubeadm version
 kubelet --version
-kubectl version --client
-
-# 查看版本的详细视图
-# kubectl version --client --output=yaml
 
 # 注意：如果 ipvs 模式成功打开，您应该会看到 IPVS 代理规则（使用 ipvsadm ），例如
 # ipvsadm -ln

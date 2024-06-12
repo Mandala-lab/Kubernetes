@@ -4,4 +4,3 @@ set -o posix -o errexit -o pipefail -x
 
 chmod +x ./base/03-components/deb/01-install-control-plane-components.sh
 ./base/03-components/deb/01-install-control-plane-components.sh
-

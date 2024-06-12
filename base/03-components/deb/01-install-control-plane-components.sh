@@ -3,3 +3,7 @@
 set -o posix -o errexit -o pipefail
 
 apt install -y kubectl
+kubectl version --client
+
+# 查看版本的详细视图
+# kubectl version --client --output=yaml
