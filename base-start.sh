@@ -35,4 +35,5 @@ chmod +x ./base/02-cri/containerd/binarymode/03-repo.sh
 chmod +x ./base/03-components/deb/template.sh
 ./base/03-components/deb/template.sh --remove=n --version="v1.30"
 
-
+chmod +x ./base/03-components/01-crictl/01-install.sh
+./base/03-components/01-crictl/01-install.sh --proxy=y --install=y --version="v1.30.0"
