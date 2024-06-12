@@ -198,9 +198,8 @@ cat /etc/security/limits.conf
 
 if [ -f /etc/security/limits.d/20-nproc.conf ];then
   cp /etc/security/limits.d/20-nproc.conf{,.back}
+  sed -i "s#4096#655350#g" /etc/security/limits.d/20-nproc.conf
 fi
-
-sed -i "s#4096#655350#g" /etc/security/limits.d/20-nproc.conf
 
 cp /etc/profile{,.back}
 cat >> /etc/profile <<EOF
