@@ -178,7 +178,6 @@ EOF
 
 # 使配置生效:
 sysctl --system
-sysctl -p
 
 # 文件限制
 if [ -f /etc/security/limits.conf ];then
@@ -237,11 +236,11 @@ do
 done
 EOF
 
-source ipvs.sh
+source ./ipvs.sh
 cat /etc/sysconfig/modules/k8s.modules
 
-ehco "通过运行以下命令验证是否加载了`br_netfilter`，`overlay`模块"
-lsmod | grep br_netfilter
+ehco "通过运行以下命令验证是否加载了`overlay`模块"
+
 lsmod | grep overlay
 
 apt install ipset ipvsadm -y

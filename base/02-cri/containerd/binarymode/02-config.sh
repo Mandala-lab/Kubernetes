@@ -75,8 +75,7 @@ overlay
 br_netfilter
 EOF
 
-sudo modprobe overlay
-sudo modprobe br_netfilter
+lsmod | grep br_netfilter
 
 # 应用 sysctl 参数而无需重新启动
 sudo sysctl --system
