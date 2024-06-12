@@ -3,7 +3,7 @@
 # 并针对国内服务器进行优化
 # 添加镜像拉取的源替换为国内的镜像源
 
-set -o posix errexit -o pipefail
+set -o posix -o errexit -o pipefail
 
 # 设置containerd.service的默认路径
 if [ -z "${CONTAINERD_SERVICE}" ]; then
@@ -51,7 +51,7 @@ if [ -f "containerd-$VERSION-linux-$ARCH.tar.gz" ]; then
     tar -zxvf containerd-$VERSION-linux-$ARCH.tar.gz -C /usr/local/
 else
     echo "文件不存在"
-    wget -t 2 -T 240 -N -S -progress=dot https://github.com/containerd/containerd/releases/download/v${VERSION}/containerd-${VERSION}-linux-${ARCH}.tar.gz
+    wget -t 2 -T 240 -N -S https://github.com/containerd/containerd/releases/download/v${VERSION}/containerd-${VERSION}-linux-${ARCH}.tar.gz
     tar -zxvf containerd-$VERSION-linux-$ARCH.tar.gz -C /usr/local/
 fi
 

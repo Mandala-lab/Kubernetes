@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-set -o posix errexit -o pipefail
+set -o posix -o errexit -o pipefail
 
 # 运行前清理
 mv /etc/security/limits.conf{.back,}
@@ -81,6 +81,7 @@ cp /etc/hosts{,.back}
 
 # systemd-resolved
 systemctl restart systemd-resolved
+systemctl enable systemd-resolved
 #systemctl status systemd-resolved
 
 # 关闭SELinux

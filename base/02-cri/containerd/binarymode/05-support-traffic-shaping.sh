@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # 启用 POSIX 模式并设置严格的错误处理机制
-set -o posix errexit -o pipefail
+set -o posix -o errexit -o pipefail
 
 # https://kubernetes.io/docs/concepts/extend-kubernetes/compute-storage-net/network-plugins/#support-traffic-shaping
 # CNI 网络插件还支持 Pod 入口和出口流量整形。您可以使用 CNI 插件团队提供的官方带宽插件，也可以使用您自己的具有带宽控制功能的插件
@@ -34,7 +34,7 @@ then
     echo "Go is installed."
 else
     echo "Go is not installed."
-    wget -t 2 -T 240 -N -S -progress=dot https://golang.google.cn/dl/go1.22.3.linux-${ARCH}.tar.gz
+    wget -t 2 -T 240 -N -S https://golang.google.cn/dl/go1.22.3.linux-${ARCH}.tar.gz
     tar -zxvf go1.22.3.linux-arm64.tar.gz -C /usr/local
     mv /usr/local/go/bin/* /usr/local/bin/
 fi

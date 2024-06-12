@@ -1,5 +1,5 @@
 #!/bin/sh
-set -o posix errexit -o pipefail
+set -o posix -o errexit -o pipefail
 
 apt install -y nfs-kernel-server #安装nfs服务
 apt install -y nfs-common

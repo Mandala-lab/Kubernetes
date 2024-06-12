@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -o posix errexit -o pipefail
+set -o posix -o errexit -o pipefail
 
 # 清除旧安装
 systemctl stop kubeadm
@@ -112,7 +112,7 @@ if [ -f "$DOWNLOAD_HOME/kubectl" ] && [ -f "$DOWNLOAD_HOME/kubectl.sha256" ]; th
 else
     echo "kubectl.service 不存在"
     #sudo curl -LO "https://dl.k8s.io/release/${RELEASE}/bin/linux/${ARCH}/{kubectl,kubectl.sha256}"
-    sudo wget -t 2 -T 240 -N -S -progress=dot https://dl.k8s.io/release/"${RELEASE}"/bin/linux/${ARCH}/{kubectl,kubectl.sha256}
+    sudo wget -t 2 -T 240 -N -S https://dl.k8s.io/release/"${RELEASE}"/bin/linux/${ARCH}/{kubectl,kubectl.sha256}
     if echo "$(cat kubectl.sha256) kubectl" | sha256sum -c; then
       echo "kubectl 的SHA256 校验成功"
     else
@@ -156,7 +156,7 @@ fi
 DOWNLOAD_DIR="/usr/bin"
 rm -rf /usr/lib/systemd/system/kubelet.service
 rm -rf /usr/lib/systemd/system/kubelet.service.d/10-kubeadm.conf
-if ! wget -t 2 -T 240 -N -S -progress=dot -q "https://raw.githubusercontent.com/kubernetes/release/${RELEASE_VERSION}/cmd/krel/templates/latest/kubelet/kubelet.service"; then
+if ! wget -t 2 -T 240 -N -S -q "https://raw.githubusercontent.com/kubernetes/release/${RELEASE_VERSION}/cmd/krel/templates/latest/kubelet/kubelet.service"; then
   echo "下载失败, 正在使用内置的文件进行替换, 但可能不是最新的, 可以进行手动替换"
   cat > /etc/systemd/system/kubelet.service <<EOF
 [Unit]
@@ -194,7 +194,7 @@ fi
 
 DOWNLOAD_DIR="/usr/bin"
 sudo mkdir -p /etc/systemd/system/kubelet.service.d
-if ! wget -t 2 -T 240 -N -S -progress=dot -q "https://raw.githubusercontent.com/kubernetes/release/${RELEASE_VERSION}/cmd/krel/templates/latest/kubeadm/10-kubeadm.conf"; then
+if ! wget -t 2 -T 240 -N -S -q "https://raw.githubusercontent.com/kubernetes/release/${RELEASE_VERSION}/cmd/krel/templates/latest/kubeadm/10-kubeadm.conf"; then
   echo "下载失败, 正在使用内置的文件进行替换, 但可能不是最新的, 可以进行手动替换"
   cat > /etc/systemd/system/kubelet.service.d/10-kubeadm.conf << EOF
 # Note: This dropin only works with kubeadm and kubelet v1.11+

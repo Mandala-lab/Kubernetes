@@ -1,6 +1,6 @@
 #!/bin/sh
 
-set -o posix errexit -o pipefail
+set -o posix -o errexit -o pipefail
 
 # 查看cgroup
 # https://man7.org/linux/man-pages/man7/cgroups.7.html

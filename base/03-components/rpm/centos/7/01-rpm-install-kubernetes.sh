@@ -1,6 +1,6 @@
 #!/bin/sh
 
-set -o posix errexit -o pipefail
+set -o posix -o errexit -o pipefail
 
 # 对于 CentOS 7
 yum update -y && yum -y install  wget psmisc vim net-tools nfs-utils telnet yum-utils device-mapper-persistent-data lvm2 git tar curl

@@ -18,10 +18,10 @@ localAPIEndpoint:
 nodeRegistration:
   name: "node1" # 该控制节点的名称, 也就是出现在kubectl get no的名称
   # CRI（容器运行时接口）的通信 socket 用来读取容器运行时的信息。 此信息会被以注解的方式添加到 Node API 对象至上，用于后续用途。
-  criSocket: unix:///var/run/containerd/containerd.sock
+  criSocket: unix:///run/containerd/containerd.sock
   # 镜像拉取策略。 这两个字段的值必须是 "Always"、"Never" 或 "IfNotPresent" 之一。 默认值是 "IfNotPresent"，也是添加此字段之前的默认行为
   imagePullPolicy: IfNotPresent
-  # 定 Node API 对象被注册时要附带的污点。 若未设置此字段（即字段值为 null），默认为控制平面节点添加控制平面污点。 如果你不想污染你的控制平面节点，可以将此字段设置为空列表
+  # 当 Node API 对象被注册时要附带的污点。 若未设置此字段（即字段值为 null），默认为控制平面节点添加控制平面污点。 如果你不想污染你的控制平面节点，可以将此字段设置为空列表
   taints:
     - effect: PreferNoSchedule
       key: node-role.kubernetes.io/master
@@ -31,9 +31,7 @@ nodeRegistration:
 ---
 apiServer:
   # certSANs 为 API 服务器签名证书设置额外的使用者备用名称（Subject Alternative Name，SAN）。
-  certSANs:
-    - 159.75.231.54
-    - "node1"
+  #  certSANs: [ ]
   extraArgs:
     # API 服务器的授权模式
     authorization-mode: Node,RBAC
@@ -53,30 +51,7 @@ kubernetesVersion: 1.30.1
 certificatesDir: /etc/kubernetes/pki
 # 集群名称。
 clusterName: kubernetes
-# 控制器管理器配置
-controllerManager: { }
-# DNS 配置
-dns: { }
-# etcd 数据库的配置。例如使用这个部分可以定制本地 etcd 或者配置 API 服务器 使用一个外部的 etcd 集群。
-etcd:
-  local:
-  # etcd 数据存储目录
-#    dataDir: /var/lib/etcd
-#    imageRepository: "registry.k8s.io"
-#    imageTag: "3.2.24"
-#    extraArgs:
-#      listen-client-urls: "http://10.100.0.1:2379"
-#    serverCertSANs:
-#      - "ec2-10-100-0-1.compute-1.amazonaws.com"
-#    peerCertSANs:
-#      - "10.100.0.1"
-# external:
-#   endpoints:
-#   - "10.100.0.1:2379"
-#   - "10.100.0.2:2379"
-#   caFile: "/etcd/kubernetes/pki/etcd/etcd-ca.crt"
-#   certFile: "/etcd/kubernetes/pki/etcd/etcd.crt"
-#   keyFile: "/etcd/kubernetes/pki/etcd/etcd.key"
+
 #imageRepository: k8s.kubesre.xyz # 镜像源
 imageRepository: registry.aliyuncs.com/google_containers # 镜像源
 # 为控制面设置一个稳定的 IP 地址或 DNS 名称。
@@ -90,7 +65,7 @@ controlPlaneEndpoint: "159.75.231.54:6443"
 # 其中包含集群的网络拓扑配置。使用这一部分可以定制 Pod 的 子网或者 Service 的子网。
 networking:
   # Kubernetes 服务所使用的的 DNS 域名。 默认值为 "cluster.local"。
-  dnsDomain: cluster.local
+  dnsDomain: "cluster.local"
   # 为 Pod 所使用的子网 默认为: 10.244.0.0/16
   # 10.10.0.0到10.10.63.255，共有16384个IP地址
   # 如果是flannel插件, 需要修改flannel的yaml文件的net-conf.json为当前的podSubnet值
@@ -98,8 +73,7 @@ networking:
   # Kubernetes 服务所使用的的子网。 默认值为 "10.96.0.0/12"
   #  serviceSubnet: "10.10.0.0/20"
   serviceSubnet: "10.96.0.0/12"
-# 调度器配置
-scheduler: { }
+
 ---
 apiVersion: kubelet.config.k8s.io/v1beta1
 kind: KubeletConfiguration

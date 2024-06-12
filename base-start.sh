@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # 启用 POSIX 模式并设置严格的错误处理机制
-set -o posix errexit -o pipefail
+set -o posix -o errexit -o pipefail
 
 # Base
 
@@ -16,7 +16,7 @@ chmod +x ./base/02-cri/containerd/binarymode/01-install.sh
 chmod +x ./base/02-cri/containerd/binarymode/02-config.sh
 ./base/02-cri/containerd/binarymode/02-config.sh
 
-chmod +x ./base/02-cri/containerd/binarymode/03-install-runc.sh
+chmod +x ./base/02-cri/containerd/binarymode/03-install-runc.sh y
 ./base/02-cri/containerd/binarymode/03-install-runc.sh
 
 chmod +x ./base/02-cri/containerd/binarymode/03-repo.sh

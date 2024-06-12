@@ -1,6 +1,6 @@
 #!/bin/sh
 
-set -o posix errexit -o pipefail
+set -o posix -o errexit -o pipefail
 
 rm -rf /etc/cni/net.d/10-default.conf
 

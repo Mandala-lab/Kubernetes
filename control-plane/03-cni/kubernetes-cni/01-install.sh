@@ -1,6 +1,6 @@
 #!/bin/sh
 
-set -o posix errexit -o pipefail
+set -o posix -o errexit -o pipefail
 
 # CNI: Container Network Interface 是 Kubernetes 用来委托网络配置的插件层
 
@@ -12,7 +12,7 @@ DEST="/opt/cni/bin"
 sudo mkdir -p "$DEST"
 
 # 安装 CNI 插件（大多数 Pod 网络都需要）：
-wget -t 2 -T 240 -N -S -progress=dot "https://github.com/containernetworking/plugins/releases/download/${CNI_PLUGINS_VERSION}/cni-plugins-linux-${ARCH}-${CNI_PLUGINS_VERSION}.tgz"
+wget -t 2 -T 240 -N -S "https://github.com/containernetworking/plugins/releases/download/${CNI_PLUGINS_VERSION}/cni-plugins-linux-${ARCH}-${CNI_PLUGINS_VERSION}.tgz"
 sudo tar cni-plugins-linux-${ARCH}-${CNI_PLUGINS_VERSION}.tgz -C "$DEST" -xz
 
 ls /opt/cni/bin

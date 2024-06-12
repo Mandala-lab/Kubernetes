@@ -1,6 +1,6 @@
 #!/bin/sh
 
-set -o posix errexit -o pipefail
+set -o posix -o errexit -o pipefail
 
 yum update -y && yum -y install wget psmisc vim net-tools nfs-utils telnet yum-utils device-mapper-persistent-data lvm2 git network-scripts tar curl
 cat /etc/systemd/system/kubelet.service.d/10-kubeadm.conf
