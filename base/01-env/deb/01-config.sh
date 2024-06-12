@@ -69,9 +69,10 @@ sudo cat /sys/class/dmi/id/product_uuid
 #sudo netplan generate
 #sudo netplan apply
 
-#  时间同步
-apt install ntpdate -y # Ubuntu
-ntpdate time.windows.com
+# 时区
+# 设置上海时区
+sudo timedatectl status
+sudo timedatectl set-timezone Asia/Shanghai
 
 # 包管理器:
 # apt install -y runc
