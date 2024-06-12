@@ -3,7 +3,7 @@
 # 并针对国内服务器进行优化
 # 添加镜像拉取的源替换为国内的镜像源
 
-#set -x
+#set -o posix errexit -o pipefail
 
 # 设置containerd.service的默认路径
 if [ -z "${CONTAINERD_SERVICE}" ]; then

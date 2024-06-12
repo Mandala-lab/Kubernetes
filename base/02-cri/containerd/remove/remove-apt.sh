@@ -1,5 +1,5 @@
 #!/bin/sh
-set -x
+set -o posix errexit -o pipefail
 
 rm -rf /opt/containerd/
 rm -rf /home/containerd

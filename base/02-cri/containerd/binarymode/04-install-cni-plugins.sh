@@ -1,6 +1,6 @@
 #!/bin/bash
 # TODO 待定, 此脚本暂不需要在Kubernetes执行
-set -x
+set -o posix errexit -o pipefail
 
 # TODO 切换为动态获取
 VERSION="v1.4.0"

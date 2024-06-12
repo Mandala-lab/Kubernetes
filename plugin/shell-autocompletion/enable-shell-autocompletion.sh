@@ -1,6 +1,6 @@
 #!/bin/sh
 
-set -x
+set -o posix errexit -o pipefail
 
 # Enable shell autocompletion
 # https://kubernetes.io/docs/tasks/tools/install-kubectl-linux/#enable-shell-autocompletion

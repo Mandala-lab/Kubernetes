@@ -1,5 +1,5 @@
 #!/bin/sh
-set -x
+set -o posix errexit -o pipefail
 
 apt install nfs-common -y
 

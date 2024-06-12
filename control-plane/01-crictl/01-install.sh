@@ -20,6 +20,6 @@ fi
 export DOWNLOAD_DIR="/usr/local/bin"
 sudo mkdir -p "$DOWNLOAD_DIR"
 
-wget -t 2 -T 240 -N -S –progress=TYPE "https://github.com/kubernetes-sigs/cri-tools/releases/download/${CRICTL_VERSION}/crictl-${CRICTL_VERSION}-linux-${ARCH}.tar.gz"
+wget -t 2 -T 240 -N -S -progress=dot "https://github.com/kubernetes-sigs/cri-tools/releases/download/${CRICTL_VERSION}/crictl-${CRICTL_VERSION}-linux-${ARCH}.tar.gz"
 tar -zxvf crictl*.tar.gz -C $DOWNLOAD_DIR
 crictl -v

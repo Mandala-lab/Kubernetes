@@ -1,6 +1,6 @@
 #!/bin/sh
 
-set -x
+set -o posix errexit -o pipefail
 
 cilium uninstall
 

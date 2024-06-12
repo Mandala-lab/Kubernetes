@@ -2,6 +2,15 @@
 
 set -o posix errexit -o pipefail
 
+# 运行前清理
+mv /etc/security/limits.conf{.back,}
+mv /etc/security/limits.d/20-nproc.conf{.back,}
+mv /etc/profile{.back,}
+mv /etc/hosts{.back,}
+cp /etc/fstab{.back,}
+
+rm -rf /etc/sysctl.d/99-kubernetes-cri.conf
+
 apt update -y
 # -e：如果任何命令的退出状态是非零值，脚本将立即退出。
 # -u：当使用未定义的变量时，脚本将立即退出。
@@ -63,6 +72,7 @@ ntpdate time.windows.com
 # 设置控制节点与工作节点
 
 # 修改Hosts
+cp /etc/hosts{,.back}
 #cat >> /etc/hosts << EOF
 #192.168.3.160 node-160
 #192.168.3.100 node-100
@@ -81,6 +91,7 @@ systemctl restart systemd-resolved
 # kubelet 的默认行为是: 如果在节点上检测到交换内存，则无法启动。自 v1.22 起支持 Swap。
 # 从 v1.28 开始，只有 `cgroup v2` 支持 Swap
 # kubelet 的 NodeSwap 特性门控是 beta 版，但默认处于禁用状态, 允许 kubelet 在节点上使用 swap
+cp /etc/fstab{,.back}
 sed -i '/^\/.*swap/s/^/#/' /etc/fstab
 sudo mount -a
 sudo swapoff -a
@@ -162,7 +173,7 @@ sysctl --system
 sysctl -p
 
 # 文件限制
-cp /etc/security/limits.conf{,back}
+cp /etc/security/limits.conf{,.back}
 cat >> /etc/security/limits.conf <<EOF
 *   soft    nofile  655350
 *   hard    nofile  655350
@@ -174,10 +185,10 @@ EOF
 
 cat /etc/security/limits.conf
 
-cp /etc/security/limits.d/20-nproc.conf{,back}
+cp /etc/security/limits.d/20-nproc.conf{,.back}
 sed -i "s#4096#655350#g" /etc/security/limits.d/20-nproc.conf
 
-cp /etc/profile{,back}
+cp /etc/profile{,.back}
 cat >> /etc/profile <<EOF
 ulimit -u 65535
 ulimit -n 65535

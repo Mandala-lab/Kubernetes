@@ -2,7 +2,7 @@
 
 rm -rf /usr/local/sbin/runc
 
-set -x
+set -o posix errexit -o pipefail
 # runc 是操作系统级别的软件包, 用于与Containerd Docker Podman等CRI底层的OCI工具
 # Containerd -> runc
 # 少数情况下, 系统可能没有安装runc或者配置不正确
@@ -21,7 +21,7 @@ else
     echo "请手动定义你的发行版的架构"
 fi
 echo $ARCH
-wget -t 2 -T 240 -N -S –progress=TYPE https://github.com/opencontainers/runc/releases/download/${VERSION}/runc.${ARCH}
+wget -t 2 -T 240 -N -S -progress=dot https://github.com/opencontainers/runc/releases/download/${VERSION}/runc.${ARCH}
 install -m 755 ./runc.${ARCH} /usr/local/sbin/runc
 
 rm -rf ./runc.${ARCH}
