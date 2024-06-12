@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 set -o posix -o errexit -o pipefail
 

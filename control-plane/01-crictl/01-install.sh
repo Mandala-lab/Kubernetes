@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 # 删除之前的
 rm -rf /etc/crictl.yaml

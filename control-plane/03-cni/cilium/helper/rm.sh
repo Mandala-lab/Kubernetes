@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 cilium uninstall cilium -n kube-system
 rm -rf /etc/cni/net.d/05-cilium.conflist

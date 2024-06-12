@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 rm -rf /usr/local/bin/crictl
 rm -rf /usr/bin/crictl

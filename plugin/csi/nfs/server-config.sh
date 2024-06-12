@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 set -o posix -o errexit -o pipefail
 
 apt install -y nfs-kernel-server #安装nfs服务
