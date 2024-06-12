@@ -8,29 +8,21 @@
 
 目前处在`PRE`初始阶段, 正在快速迭代, 仅在本机MAC环境的aarch64的Ubuntu2.04的虚拟机上测试运行
 
-## 专业名词
-
-1. CRI:
-    1. Cilium
-    2. Kube-proxy
-2. CNI:
-    1. Containerd:
-    2. CRI-O:
-    3.
-
 ## 介绍
 
 该仓库旨在快速在Ubuntu一键部署创建一个全新的一个单节点的控制平面
 
 与本仓库同步的文章: https://juejin.cn/post/7292041370893778983
 
-### 本项目支持的Kubernetes版本:
+### 本项目支持的Kubernetes版本
 
 1. kubernetes 1.25.X
 2. kubernetes 1.26.X
 3. kubernetes 1.27.X
 4. kubernetes 1.28.X
 5. kubernetes 1.29.X
+6. kubernetes 1.29.X
+6. kubernetes 1.30.X
 
 ### 本项目支持的[CRI]():
 
@@ -44,16 +36,19 @@
 
 ## 说明
 
-目录说明:
+目录:
 
-| 目录                     | 角色            | 作用                   | 备注                                      |
-|------------------------|---------------|----------------------|-----------------------------------------|
-| 01-base-env            | ALL           | 安装与配置Kubernetes所需的环境 | 当前仅适用于Ubuntu发行版                         |
-| 02-CRI                 | ALL           | 安装与配置CRI容器运行时        | 当前只适配Containerd                         |
-| 03-CNI                 |               | 安装与配置CNI             | 如果是kube-proxy组件,则需要安装                   |
-| 04-cgroup              | ALL           | 配置cgroup             | 当前仅适用于Ubuntu发行版                         |
-| 05-crictl              | Control plane | 安装与配置crictl          | 二进制安装需要单独安装, 包管理器安装的方式已经安装该工具. 但它们都需要配置 |
-| 06-apt-init-components | ALL           | 安装Kubernetes组件与初始化集群 | 当前仅适合Ubuntu                             |
+### base
+
+基础环境安装, 所有运行Kubernetes的机器节点都需要进行的配置
+
+### control-plane
+
+控制平面节点需要配置
+
+#### worker-node
+
+工作节点需要配置
 
 ## 架构
 
@@ -92,45 +87,6 @@ graph LR
 
 ```shell
 git clone --depth 1 https://github.com/Mandala-lab/Kubernetes.git
-```
-
-### Master 控制平面
-
-#### Cilium
-
-##### 介绍
-
-Cilium 是一种网络、可观测性和安全解决方案，具有基于 eBPF 的数据平面。
-Cilium 提供了一个简单的扁平第 3 层网络，能够以本机路由或叠加/封装模式跨越多个集群，
-并且可以使用与网络寻址分离的基于身份的安全模型在 L3-L7 上实施网络策略。
-Cilium 可以作为 kube-proxy 的替代品;它还提供额外的、选择加入的可观测性和安全功能。
-Cilium 是 CNCF 的毕业项目
-
-##### 要求
-
-1. Kubernetes 必须配置为使用 CNI（请参阅网络插件要求）
-2. Linux 内核 >= 4.9.17
-
-##### Base 基本安装
-
-chmod +x ./base-env-apt-cilium-install.sh
-./base-env-apt-cilium-install.sh
-
-### Worknode 工作节点
-
-## 架构
-
-### CRI
-
-```mermaid
-graph LR
-    kubelet <-->|CRI| containerd
-    subgraph CRI-Plugins
-        containerd
-    end
-    containerd --> container1
-    containerd --> container2
-    containerd --> containerN
 ```
 
 ## 局限性

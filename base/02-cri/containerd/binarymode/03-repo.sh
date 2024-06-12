@@ -15,7 +15,7 @@ cat -n /etc/containerd/config.toml | grep -A 1 "\[plugins\.\"io\.containerd\.grp
 mkdir -p /etc/containerd/certs.d/docker.io
 cat > /etc/containerd/certs.d/docker.io/hosts.toml << EOF
 server = "https://docker.io"
-[host."https://docker.mirrors.ustc.edu.cn"]
+[host."https://docker.kubesre.xyz"]
 capabilities = ["pull", "resolve"]
 
 [host."https://dockerproxy.com"]
@@ -38,17 +38,29 @@ EOF
 mkdir -p /etc/containerd/certs.d/registry.k8s.io
 tee /etc/containerd/certs.d/registry.k8s.io/hosts.toml << 'EOF'
 server = "https://registry.k8s.io"
+[host."k8s.nju.edu.cn"]
+  capabilities = ["pull", "resolve", "push"]
+
+[host."registry-k8s-io.mirrors.sjtug.sjtu.edu.cn"]
+  capabilities = ["pull", "resolve", "push"]
+
+[host."https://k8s.kubesre.xyz"]
+  capabilities = ["pull", "resolve", "push"]
+
 [host."registry.cn-hangzhou.aliyuncs.com/google_containers"]
 capabilities = ["pull", "resolve", "push"]
 
 [host."https://k8s.m.daocloud.io"]
   capabilities = ["pull", "resolve", "push"]
+
 EOF
 
 # docker.elastic.co镜像加速
 mkdir -p /etc/containerd/certs.d/docker.elastic.co
 tee /etc/containerd/certs.d/docker.elastic.co/hosts.toml << 'EOF'
 server = "https://docker.elastic.co"
+[host."https://elastic.kubesre.xyz"]
+  capabilities = ["pull", "resolve", "push"]
 
 [host."https://elastic.m.daocloud.io"]
   capabilities = ["pull", "resolve", "push"]
@@ -59,7 +71,7 @@ mkdir -p /etc/containerd/certs.d/gcr.io
 tee /etc/containerd/certs.d/gcr.io/hosts.toml << 'EOF'
 server = "https://gcr.io"
 
-[host."https://gcr.m.daocloud.io"]
+[host."https://gcr.kubesre.xyz"]
   capabilities = ["pull", "resolve", "push"]
 EOF
 
@@ -67,6 +79,8 @@ EOF
 mkdir -p /etc/containerd/certs.d/ghcr.io
 tee /etc/containerd/certs.d/ghcr.io/hosts.toml << 'EOF'
 server = "https://ghcr.io"
+[host."https://ghcr.nju.edu.cn"]
+  capabilities = ["pull", "resolve", "push"]
 
 [host."https://ghcr.m.daocloud.io"]
   capabilities = ["pull", "resolve", "push"]
@@ -76,6 +90,11 @@ EOF
 mkdir -p /etc/containerd/certs.d/k8s.gcr.io
 tee /etc/containerd/certs.d/k8s.gcr.io/hosts.toml << 'EOF'
 server = "https://k8s.gcr.io"
+[host."https://k8s-gcr-io.mirrors.sjtug.sjtu.edu.cn"]
+  capabilities = ["pull", "resolve", "push"]
+
+[host."https://gcr.nju.edu.cn"]
+  capabilities = ["pull", "resolve", "push"]
 
 [host."https://k8s-gcr.m.daocloud.io"]
   capabilities = ["pull", "resolve", "push"]
@@ -85,6 +104,8 @@ EOF
 mkdir -p /etc/containerd/certs.d/mcr.microsoft.com
 tee /etc/containerd/certs.d/mcr.microsoft.com/hosts.toml << 'EOF'
 server = "https://mcr.microsoft.com"
+[host."https://mcr.kubesre.xyz"]
+  capabilities = ["pull", "resolve", "push"]
 
 [host."https://mcr.m.daocloud.io"]
   capabilities = ["pull", "resolve", "push"]
@@ -94,6 +115,11 @@ EOF
 mkdir -p /etc/containerd/certs.d/nvcr.io
 tee /etc/containerd/certs.d/nvcr.io/hosts.toml << 'EOF'
 server = "https://nvcr.io"
+[host."https://nvcr.nju.edu.cn"]
+  capabilities = ["pull", "resolve", "push"]
+
+[host."https://nvcr.kubesre.xyz"]
+  capabilities = ["pull", "resolve", "push"]
 
 [host."https://nvcr.m.daocloud.io"]
   capabilities = ["pull", "resolve", "push"]
@@ -103,6 +129,11 @@ EOF
 mkdir -p /etc/containerd/certs.d/quay.io
 tee /etc/containerd/certs.d/quay.io/hosts.toml << 'EOF'
 server = "https://quay.io"
+[host."https://quay.nju.edu.cn"]
+  capabilities = ["pull", "resolve", "push"]
+
+[host."https://quay.mirrors.ustc.edu.cn"]
+  capabilities = ["pull", "resolve", "push"]
 
 [host."https://quay.m.daocloud.io"]
   capabilities = ["pull", "resolve", "push"]
@@ -112,6 +143,8 @@ EOF
 mkdir -p /etc/containerd/certs.d/registry.jujucharms.com
 tee /etc/containerd/certs.d/registry.jujucharms.com/hosts.toml << 'EOF'
 server = "https://registry.jujucharms.com"
+[host."https://jujucharms.kubesre.xyz"]
+  capabilities = ["pull", "resolve", "push"]
 
 [host."https://jujucharms.m.daocloud.io"]
   capabilities = ["pull", "resolve", "push"]

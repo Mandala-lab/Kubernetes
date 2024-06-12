@@ -1,3 +1,4 @@
+# https://kubernetes.io/docs/reference/config-api/kubeadm-config.v1beta3
 apiVersion: kubeadm.k8s.io/v1beta3
 kind: InitConfiguration
 bootstrapTokens:
@@ -94,10 +95,8 @@ clusterName: "example-cluster"
 ---
 apiVersion: kubelet.config.k8s.io/v1beta1
 kind: KubeletConfiguration
-cgroupDriver: systemd # 默认值为cgroupfs
 # kubelet specific options here
 ---
 apiVersion: kubeproxy.config.k8s.io/v1alpha1
 kind: KubeProxyConfiguration
 # kube-proxy specific options here
-mode: "ipvs"
