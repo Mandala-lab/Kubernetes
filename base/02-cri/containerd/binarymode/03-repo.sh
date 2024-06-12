@@ -38,8 +38,6 @@ EOF
 mkdir -p /etc/containerd/certs.d/registry.k8s.io
 tee /etc/containerd/certs.d/registry.k8s.io/hosts.toml << 'EOF'
 server = "https://registry.k8s.io"
-[host."k8s.nju.edu.cn"]
-  capabilities = ["pull", "resolve", "push"]
 
 [host."registry-k8s-io.mirrors.sjtug.sjtu.edu.cn"]
   capabilities = ["pull", "resolve", "push"]
@@ -51,6 +49,9 @@ server = "https://registry.k8s.io"
 capabilities = ["pull", "resolve", "push"]
 
 [host."https://k8s.m.daocloud.io"]
+  capabilities = ["pull", "resolve", "push"]
+
+[host."k8s.nju.edu.cn"]
   capabilities = ["pull", "resolve", "push"]
 
 EOF
@@ -161,6 +162,8 @@ EOF
 
 systemctl restart containerd
 # systemctl status containerd
+
+ls /etc/containerd/certs.d
 
 # containerd test
 ctr --debug  i pull \

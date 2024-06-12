@@ -11,8 +11,20 @@ error_exit() {
 # 解析命令行参数
 remove=""
 VERSION=""
+proxy=""
 while [ "$#" -gt 0 ]; do
     case "$1" in
+        --proxy=*)
+            value="${1#*=}"  # 提取等号后的值
+            if [ "$value" = "y" ]; then
+                proxy="y"
+            elif [ "$value" = "n" ]; then
+                proxy="n"
+            else
+                error_exit "$1"
+            fi
+            shift
+            ;;
         --remove=*)
             value="${1#*=}"  # 提取等号后的值
             if [ "$value" = "y" ]; then
@@ -54,24 +66,36 @@ fi
 # 输出用户定义的Kubernetes版本
 echo "version: $VERSION"
 if [ "$VERSION" = "" ]; then
- VERSION="v1.30"
+  VERSION="v1.30"
 fi
 
 unset http_proxy
 unset https_proxy
 
-# 安装 kubeadm、kubelet
+# 安装基础工具
 sudo apt install -y apt-transport-https ca-certificates curl
 
-echo "deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/$VERSION/deb/ /" \
-| sudo tee /etc/apt/sources.list.d/kubernetes.list
-
+# 配置kubernetes 源按照安装版本区分不同仓库: https://developer.aliyun.com/mirror/kubernetes
 if [ -f /etc/apt/keyrings/kubernetes-apt-keyring.gpg ];then
-  rm -rf /etc/apt/keyrings/kubernetes-apt-keyring.gpg
+    rm -rf /etc/apt/keyrings/kubernetes-apt-keyring.gpg
 fi
 
-mkdir -p /etc/apt/keyrings/
-curl -fsSL https://pkgs.k8s.io/core:/stable:/$VERSION/deb/Release.key | sudo gpg --dearmor -o /etc/apt/keyrings/kubernetes-apt-keyring.gpg
+if [ "$proxy" = "n" ];then
+  ## 服务器可以访问pkgs.k8s.io时使用官方镜像:
+  echo "deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/$VERSION/deb/ /" \
+  | sudo tee /etc/apt/sources.list.d/kubernetes.list
+  mkdir -p /etc/apt/keyrings/
+  curl -fsSL https://pkgs.k8s.io/core:/stable:/"$VERSION"/deb/Release.key | sudo gpg --dearmor -o /etc/apt/keyrings/kubernetes-apt-keyring.gpg
+  else
+  ## 国内代理:
+  if [ -f /etc/apt/sources.list.d/kubernetes.list ];then
+    rm -rf /etc/apt/sources.list.d/kubernetes.list
+  fi
+  curl -fsSL https://mirrors.aliyun.com/kubernetes-new/core/stable/"$VERSION"/deb/Release.key |
+      gpg --dearmor -o /etc/apt/keyrings/kubernetes-apt-keyring.gpg
+  echo "deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://mirrors.aliyun.com/kubernetes-new/core/stable/$VERSION/deb/ /" |
+      tee /etc/apt/sources.list.d/kubernetes.list
+fi
 
 # 遇到
 # Reading package lists... Done

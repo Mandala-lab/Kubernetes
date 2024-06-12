@@ -13,7 +13,7 @@ if [ -f /etc/hosts.back ];then
   mv /etc/hosts{.back,}
 fi
 if [ -f /etc/fstab.back ];then
-  cp /etc/fstab{.back,}
+  mv /etc/fstab{.back,}
 fi
 
 rm -rf /etc/sysctl.d/99-kubernetes-cri.conf
@@ -212,7 +212,7 @@ ulimit -v unlimited
 ulimit -t unlimited
 ulimit -c unlimited
 EOF
-
+source /etc/profile
 cat /etc/profile
 
 ## 加载内核

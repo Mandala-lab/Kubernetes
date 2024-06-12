@@ -1,24 +1,57 @@
 #!/bin/bash
+# TODO PRE 未经验证
 
 set -o posix -o errexit -o pipefail
 
-# 清除旧安装
-systemctl stop kubeadm
-systemctl stop kubelet
-systemctl stop kubectl
-sudo apt purge -y kubeadm kubectl kubelet kubernetes-cni kube*
-sudo apt-mark unhold kubeadm
-sudo apt-mark unhold kubelet
-sudo apt-mark unhold kubectl
-sudo apt remove -y kubeadm kubelet kubectl
-sudo apt remove -y containerd
-rm -rf /usr/local/bin/kube*
-rm -rf /usr/bin/kube*
-rm -rf /etc/systemd/system/kubelet.service.d
-rm -rf /var/lib/kube*
-rm -rf /etc/sysconfig/kubelet
-rm -rf /etc/kubernetes
-rm -rf /etc/sysctl.d/99-kubernetes-cri.conf
+remove=""
+VERSION=""
+
+# 函数：显示错误消息并退出
+error_exit() {
+    echo "Error: Invalid argument value for $1. Expected 'y' or 'n'."
+    exit 1
+}
+
+while [ "$#" -gt 0 ]; do
+    case "$1" in
+        --remove=*)
+            value="${1#*=}"  # 提取等号后的值
+            if [ "$value" = "y" ]; then
+                remove="y"
+            elif [ "$value" = "n" ]; then
+                remove="n"
+            else
+                error_exit "$1"
+            fi
+            shift
+            ;;
+        --version=*)
+            VERSION="${1#*=}"  # 提取等号后的值
+            shift
+            ;;
+    esac
+done
+
+# 是否清除旧安装
+if [ $remove = "y" ]; then
+  # 清除旧安装
+  systemctl stop kubeadm
+  systemctl stop kubelet
+  systemctl stop kubectl
+  sudo apt purge -y kubeadm kubectl kubelet kubernetes-cni kube*
+  sudo apt-mark unhold kubeadm
+  sudo apt-mark unhold kubelet
+  sudo apt-mark unhold kubectl
+  sudo apt remove -y kubeadm kubelet kubectl
+  sudo apt remove -y containerd
+  rm -rf /usr/local/bin/kube*
+  rm -rf /usr/bin/kube*
+  rm -rf /etc/systemd/system/kubelet.service.d
+  rm -rf /var/lib/kube*
+  rm -rf /etc/sysconfig/kubelet
+  rm -rf /etc/kubernetes
+  rm -rf /etc/sysctl.d/99-kubernetes-cri.conf
+fi
 
 # 安装 kubeadm、kubelet
 # https://kubernetes.io/zh-cn/docs/setup/production-environment/tools/kubeadm/install-kubeadm/
@@ -26,8 +59,11 @@ export DOWNLOAD_HOME="/home/kubernetes"
 mkdir -p $DOWNLOAD_HOME
 cd "$DOWNLOAD_HOME" || exit
 
-RELEASE=$(wget -qO- https://dl.k8s.io/release/stable.txt)
-#RELEASE="$(curl -LO https://dl.k8s.io/release/stable.txt)"
+if [ "$VERSION" = "" ];then
+  VERSION=$(wget -T 15 -t 1 -qO- https://dl.k8s.io/release/stable.txt)
+  #VERSION="v1.30.2"
+  #VERSION="$(curl -LO https://dl.k8s.io/release/stable.txt)"
+fi
 
 # 使用uname -m获取系统架构
 arch_raw=$(uname -m)
@@ -48,6 +84,18 @@ esac
 
 # 输出最终的架构名称
 echo "Detected architecture: $ARCH"
+
+RELEASE="$(curl -sSL https://dl.k8s.io/release/stable.txt)"
+#RELEASE="v1.30.2"
+ARCH="amd64"
+cd $DOWNLOAD_DIR || exit
+sudo curl -L --remote-name-all https://dl.k8s.io/release/${RELEASE}/bin/linux/${ARCH}/{kubeadm,kubelet}
+sudo chmod +x {kubeadm,kubelet}
+
+RELEASE_VERSION="v0.16.2"
+curl -sSL "https://raw.githubusercontent.com/kubernetes/release/${RELEASE_VERSION}/cmd/krel/templates/latest/kubelet/kubelet.service" | sed "s:/usr/bin:${DOWNLOAD_DIR}:g" | sudo tee /usr/lib/systemd/system/kubelet.service
+sudo mkdir -p /usr/lib/systemd/system/kubelet.service.d
+curl -sSL "https://raw.githubusercontent.com/kubernetes/release/${RELEASE_VERSION}/cmd/krel/templates/latest/kubeadm/10-kubeadm.conf" | sed "s:/usr/bin:${DOWNLOAD_DIR}:g" | sudo tee /usr/lib/systemd/system/kubelet.service.d/10-kubeadm.conf
 
 # kubeadm
 if [ -f "$DOWNLOAD_HOME/kubeadm" ] && [ -f "$DOWNLOAD_HOME/kubeadm.sha256" ]; then
@@ -127,7 +175,7 @@ fi
 # 并添加 kubelet 系统服务
 # 查看 https://github.com/kubernetes/release/tree/master 获取RELEASE_VERSION的版本号
 DOWNLOAD_DIR="/usr/local/bin"
-RELEASE_VERSION="v0.16.4"
+RELEASE_VERSION="v0.17.0"
 
 # 判断当前目录kubelet.service文件是否存在, 存在则删除
 if [ -f "$DOWNLOAD_HOME/kubelet.service" ]; then
@@ -258,5 +306,3 @@ kubectl version --client
 # 虽然没有 IPVS 代理规则或出现以下日志，但表明 kube-proxy 无法使用 IPVS 模式：
 # Can't use ipvs proxier, trying iptables proxier
 # Using iptables Proxier.
-
-set +x

@@ -1,5 +1,4 @@
-#!/usr/bin/env bash
-# 启用 POSIX 模式并设置严格的错误处理机制
+#!/bin/bash
+# TODO PRE 未经验证
+
 set -o posix -o errexit -o pipefail
-
-
