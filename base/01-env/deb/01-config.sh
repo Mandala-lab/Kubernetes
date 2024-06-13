@@ -53,8 +53,8 @@ sudo cat /sys/class/dmi/id/product_uuid
 #        - $CIDR
 #      nameservers: # 用于指定DNS服务器地址的部分
 #          addresses: # 列出DNS服务器的IP地址
-#            #- 114.114.114.114
-#            - $DNS_IP
+#            - 223.5.5.5
+#            - 223.6.6.6
 #      routes: # 配置静态路由
 #          - to: default #目标网络地址，default 表示默认路由, 0.0.0.0/0
 #            via: $NEXT_ROUTE # 指定了路由数据包的下一跳地址，192.168.2.1 表示数据包将通过该地址进行路由
@@ -88,8 +88,17 @@ cp /etc/hosts{,.back}
 #EOF
 
 # systemd-resolved
-systemctl restart systemd-resolved
-systemctl enable systemd-resolved
+# 推荐配置. 会影响CoreDNS, 造成回环问题
+systemctl disable systemd-resolved
+systemctl stop systemd-resolved
+
+cp /etc/resolv.conf{,.back}
+rm -rf /etc/systemd/resolved.conf
+rm -rf /etc/resolv.conf
+cat > /etc/resolv.conf <<EOF
+nameserver 114.114.114.114
+EOF
+
 #systemctl status systemd-resolved
 
 # 关闭SELinux
@@ -257,5 +266,3 @@ cat /etc/security/limits.conf
 cat /etc/profile
 #echo "blkid | grep swap: 为空就正常"
 #sudo blkid | grep swap
-
-set +x
