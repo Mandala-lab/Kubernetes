@@ -35,5 +35,8 @@ chmod +x ./base/02-cri/containerd/binarymode/03-repo.sh
 chmod +x ./base/03-components/deb/template.sh
 ./base/03-components/deb/template.sh --remove=n --version="v1.30"
 
+# 如果需要手动上传, 那么请上传二进制文件到/tmp, 文件名为: crictl-${CRICTL_VERSION}-linux-${ARCH}.tar.gz
+# CRICTL_VERSION: 版本, 例如v1.30.0
+# ARCH: 架构, 例如, amd64
 chmod +x ./base/03-components/01-crictl/01-install.sh
 ./base/03-components/01-crictl/01-install.sh --proxy=y --install=y --version="v1.30.0"

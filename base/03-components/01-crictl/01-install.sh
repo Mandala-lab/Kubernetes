@@ -48,9 +48,9 @@ if [ "$CRICTL_VERSION" = "" ]; then
   export CRICTL_VERSION="v1.30.0"
 fi
 
-
+# 如果在环境变量里, 那么跳过下载与安装
 if which crictl -eq 0 && $install != "n";then
-  echo "runc已经安装"
+  echo "crictl已经安装"
   crictl -v
   exit 0
 fi
@@ -68,8 +68,10 @@ else
 fi
 
 export DOWNLOAD_DIR="/usr/local/bin"
+export SAVED_DIR="/tmp"
 sudo mkdir -p "$DOWNLOAD_DIR"
 
+# 是否使用github代理
 url=""
 if [ -n "$github_proxy" ];then
   url="${github_proxy}https://github.com/kubernetes-sigs/cri-tools/releases/download/${CRICTL_VERSION}/crictl-${CRICTL_VERSION}-linux-${ARCH}.tar.gz"
@@ -77,6 +79,15 @@ if [ -n "$github_proxy" ];then
     url="https://github.com/kubernetes-sigs/cri-tools/releases/download/${CRICTL_VERSION}/crictl-${CRICTL_VERSION}-linux-${ARCH}.tar.gz"
 fi
 
-wget -t 2 -T 240 -N -S "$url"
-tar -zxvf crictl*.tar.gz -C $DOWNLOAD_DIR
+# 如果存在, 那么跳过下载, 直接安装到环境变量, 适用于手动上传
+if [ -f "$SAVED_DIR/crictl-${CRICTL_VERSION}-linux-${ARCH}.tar.gz" ];then
+  tar -zxvf $SAVED_DIR/crictl*.tar.gz -C $DOWNLOAD_DIR
+fi
+
+# 无论是否存在, 都重新下载安装
+if [ "$install" = "y" ]; then
+  wget -t 2 -T 240 -N -S "$url"
+  tar -zxvf crictl*.tar.gz -C $DOWNLOAD_DIR
+fi
+
 crictl -v
