@@ -11,9 +11,9 @@ chmod +x ./base/01-env/deb/02-ipvs.sh
 ./base/01-env/deb/02-ipvs.sh
 
 chmod +x ./base/01-env/deb/03-allow-port.sh
-./base/01-env/deb/02-allow-port.sh
+./base/01-env/deb/03-allow-port.sh
 
-chmod +x ./base/02-cri/containerd/binarymode/01-install.sh
+chmod +x ./base/02-cri/containerd/binarymode/01-install.sh --proxy=y --install=n --version="1.7.17"
 ./base/02-cri/containerd/binarymode/01-install.sh
 
 chmod +x ./base/02-cri/containerd/binarymode/02-config.sh

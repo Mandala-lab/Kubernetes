@@ -25,9 +25,61 @@ rm -rf /etc/sysctl.d/99-kubernetes-cri.conf
 
 hash -r
 
+github_proxy=""
+install=""
+VERSION=""
+# 函数：显示错误消息并退出
+error_exit() {
+    echo "Error: Invalid argument value for $1. Expected 'y' or 'n'."
+    exit 1
+}
+
+# 解析命令行参数
+while [ "$#" -gt 0 ]; do
+    case "$1" in
+        --proxy=*)
+            value="${1#*=}"  # 提取等号后的值
+            if [ "$value" = "y" ]; then
+                github_proxy="https://mirror.ghproxy.com/"
+            elif [ "$value" = "n" ]; then
+                github_proxy=""
+            else
+                error_exit "$1"
+            fi
+            shift
+            ;;
+        --install=*)
+            value="${1#*=}"
+            if [ "$value" = "y" ] || [ "$value" = "n" ]; then
+                install="$value"
+            else
+                error_exit "$1"
+            fi
+            shift
+            ;;
+        --version=*)
+            VERSION="${1#*=}"
+            shift
+            ;;
+        *)  # 处理未知选项
+            echo "Error: Unsupported argument $1."
+            exit 1
+            ;;
+    esac
+done
+
 # 安装containerd
 # TODO 编写可动态获取版本的shell
-export VERSION="1.7.17"
+if [ "$VERSION" = "" ];then
+  export VERSION="1.7.17"
+fi
+
+if which ctr -eq 0 && $install != "n";then
+  echo "containerd已经安装"
+  ctr -v
+  exit 0
+fi
+
 ARCH=""
 # 使用uname -m获取架构信息
 machine=$(uname -m)
@@ -42,17 +94,24 @@ fi
 
 echo "ARCH=${ARCH}"
 
+url=""
+if [ -n "$github_proxy" ];then
+  url="${github_proxy}https://github.com/containerd/containerd/releases/download/v${VERSION}/containerd-${VERSION}-linux-${ARCH}.tar.gz"
+  else
+    url="https://github.com/containerd/containerd/releases/download/v${VERSION}/containerd-${VERSION}-linux-${ARCH}.tar.gz"
+fi
+
 # 定义containerd的保存路径, 用于保存下载的Containerd二进制文件
 export CONTAINERD_HOME="/home/containerd"
 mkdir -p $CONTAINERD_HOME
 cd $CONTAINERD_HOME || exit
 if [ -f "containerd-$VERSION-linux-$ARCH.tar.gz" ]; then
     echo "文件存在"
-    tar -zxvf containerd-$VERSION-linux-$ARCH.tar.gz -C /usr/local/
+    tar -zxvf containerd-"$VERSION"-linux-$ARCH.tar.gz -C /usr/local/
 else
     echo "文件不存在"
-    wget -t 2 -T 240 -N -S https://github.com/containerd/containerd/releases/download/v${VERSION}/containerd-${VERSION}-linux-${ARCH}.tar.gz
-    tar -zxvf containerd-$VERSION-linux-$ARCH.tar.gz -C /usr/local/
+    wget -t 2 -T 240 -N -S "$url"
+    tar -zxvf containerd-"$VERSION"-linux-$ARCH.tar.gz -C /usr/local/
 fi
 
 set +x
