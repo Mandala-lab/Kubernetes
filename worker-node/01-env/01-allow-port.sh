@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -o posix -o errexit -o pipefail
+set -e -o posix -o pipefail
 
 # 工作节点需要开启以下下端口:
 # 协议	方向	端口范围	目的	使用者

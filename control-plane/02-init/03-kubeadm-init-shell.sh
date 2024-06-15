@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # 启用 POSIX 模式并设置严格的错误处理机制
-set -o posix -o errexit -o pipefail
+set -e -o posix -o pipefail
 
 # Kubernetes要求net.bridge.bridge-nf-call-iptables = 1,但是为了使用Cilium,我们需要将其设置为0
 # 使用 --ignore-preflight-errors=all  忽略预检错误net.bridge.bridge-nf-call-iptables = 0这个错误

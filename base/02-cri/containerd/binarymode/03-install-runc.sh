@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -o posix -o errexit -o pipefail -x
+set -e -o posix -o pipefail -x
 
 github_proxy=""
 install=""
@@ -17,7 +17,7 @@ while [ "$#" -gt 0 ]; do
             value="${1#*=}"  # 提取等号后的值
             if [ "$value" = "y" ]; then
                 github_proxy="https://mirror.ghproxy.com/"
-            elif [ "$value" = "n" ]; then
+            elif [[ "$value" == "n" ]]; then
                 github_proxy=""
             else
                 error_exit "$1"
@@ -26,7 +26,7 @@ while [ "$#" -gt 0 ]; do
             ;;
         --install=*)
             value="${1#*=}"
-            if [ "$value" = "y" ] || [ "$value" = "n" ]; then
+            if [[ "$value" == "y" ]] || [[ "$value" = "n" ]]; then
                 install="$value"
             else
                 error_exit "$1"
@@ -56,9 +56,9 @@ ARCH=""
 # 使用uname -m获取架构信息
 machine=$(uname -m)
 # 判断架构信息并设置变量的值
-if [ "$machine" = "aarch64" ]; then
+if [[ "$machine" == "aarch64" ]]; then
     ARCH="arm64"
-elif [ "$machine" = "x86_64" ]; then
+elif [[ "$machine" == "x86_64" ]]; then
     ARCH="amd64"
 else
     echo "无法失败当前操作系统的架构, 请手动定义你的发行版的架构: ARCH=你的操作系统架构, 例如: ARCH=\"amd64\" "

@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # 启用 POSIX 模式并设置严格的错误处理机制
-set -o posix -o errexit -o pipefail
+set -e -o posix -o pipefail
 
 kubectl -n kube-system exec ds/cilium -- cilium status
 kubectl -n kube-system exec ds/cilium -- cilium status | grep Masquerading

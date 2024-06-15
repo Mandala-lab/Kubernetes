@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -o posix -o errexit -o pipefail
+set -e -o posix -o pipefail
 
 # CNI: Container Network Interface 是 Kubernetes 用来委托网络配置的插件层
 

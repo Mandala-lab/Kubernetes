@@ -3,41 +3,46 @@
 # 并针对国内服务器进行优化
 # 添加镜像拉取的源替换为国内的镜像源
 
-set -o posix -o errexit -o pipefail
+set -e -o posix -o pipefail
 
-# 设置containerd.service的默认路径
-if [ -z "${CONTAINERD_SERVICE}" ]; then
-  export CONTAINERD_SERVICE="/etc/systemd/system/containerd.service"
-fi
-# 设置containerd配置文件config.toml的路径
-if [ -z "${CONTAINERD_CONFIG_FILE_PATH}" ]; then
-  export CONTAINERD_CONFIG_FILE_PATH="/etc/containerd/config.toml"
-fi
+[[ "$TRACE" ]] && set -x
 
-echo "正在生成containerd的文件"
-# 生成containerd的配置文件
-mkdir -p /etc/containerd/
-containerd config default | tee "$CONTAINERD_CONFIG_FILE_PATH"
-# 配置文件默认在`/etc/containerd/config.toml` 这里仅修改两处配置
-# 替换为国内镜像, 国内服务器可以使用k8s.m.daocloud.io或者registry.cn-hangzhou.aliyuncs.com/google_containers/pause
-#sed -i 's#sandbox_image = .*#sandbox_image = "k8s.m.daocloud.io:3.9"#' "$CONTAINERD_CONFIG_FILE_PATH"
-sed -i 's#sandbox_image = .*#sandbox_image = "registry.cn-hangzhou.aliyuncs.com/google_containers/pause:3.9"#' "$CONTAINERD_CONFIG_FILE_PATH"
-grep -nE "sandbox_image" "$CONTAINERD_CONFIG_FILE_PATH"
+set_containerd_path(){
+  # 设置containerd.service的默认路径
+  if [ -z "${CONTAINERD_SERVICE}" ]; then
+    export CONTAINERD_SERVICE="/etc/systemd/system/containerd.service"
+  fi
+  # 设置containerd配置文件config.toml的路径
+  if [ -z "${CONTAINERD_CONFIG_FILE_PATH}" ]; then
+    export CONTAINERD_CONFIG_FILE_PATH="/etc/containerd/config.toml"
+  fi
 
-# 当 systemd 是选定的初始化系统时, 应当选择SystemdCgroup = true, 否则不需要修改
-# 要在runc中使用 systemd的cgroup 驱动程序，请将 /etc/containerd/config.toml修改SystemdCgroup为true
-# 如果使用 cgroup v2，建议使用 systemd的cgroup 驱动程序
-# 参考: https://kubernetes.io/zh-cn/docs/setup/production-environment/container-runtimes/#containerd-systemd
-sed -i 's#SystemdCgroup = false#SystemdCgroup = true#g' "$CONTAINERD_CONFIG_FILE_PATH"
+  echo "正在生成containerd的文件"
+  # 生成containerd的配置文件
+  mkdir -p /etc/containerd/
+  containerd config default | tee "$CONTAINERD_CONFIG_FILE_PATH"
+  # 配置文件默认在`/etc/containerd/config.toml` 这里仅修改两处配置
+  # 替换为国内镜像, 国内服务器可以使用k8s.m.daocloud.io或者registry.cn-hangzhou.aliyuncs.com/google_containers/pause
+  #sed -i 's#sandbox_image = .*#sandbox_image = "k8s.m.daocloud.io:3.9"#' "$CONTAINERD_CONFIG_FILE_PATH"
+  sed -i 's#sandbox_image = .*#sandbox_image = "registry.cn-hangzhou.aliyuncs.com/google_containers/pause:3.9"#' "$CONTAINERD_CONFIG_FILE_PATH"
+  grep -nE "sandbox_image" "$CONTAINERD_CONFIG_FILE_PATH"
 
-# 下载containerd.service
-# 配置containerd的service单元文件
-# 命令说明:
-# 1. 如果存在containerd.service,内容 可能不是最新的, 而且也会影响下载下来的文件名
-# 删除当前目录的containerd.service, 如果文件不存在, rm -rf 也不会删除, 无需判断文件是否存在
-# 2. 从Github的containerd下载containerd.service文件, 如果下载失败, 则使用内置的文件进行替换
-# 删除旧的containerd.service文件
-rm -rf ./containerd.service
+  # 当 systemd 是选定的初始化系统时, 应当选择SystemdCgroup = true, 否则不需要修改
+  # 要在runc中使用 systemd的cgroup 驱动程序，请将 /etc/containerd/config.toml修改SystemdCgroup为true
+  # 如果使用 cgroup v2，建议使用 systemd的cgroup 驱动程序
+  # 参考: https://kubernetes.io/zh-cn/docs/setup/production-environment/container-runtimes/#containerd-systemd
+  sed -i 's#SystemdCgroup = false#SystemdCgroup = true#g' "$CONTAINERD_CONFIG_FILE_PATH"
+
+  # 下载containerd.service
+  # 配置containerd的service单元文件
+  # 命令说明:
+  # 1. 如果存在containerd.service,内容 可能不是最新的, 而且也会影响下载下来的文件名
+  # 删除当前目录的containerd.service, 如果文件不存在, rm -rf 也不会删除, 无需判断文件是否存在
+  # 2. 从Github的containerd下载containerd.service文件, 如果下载失败, 则使用内置的文件进行替换
+  # 删除旧的containerd.service文件
+  rm -rf ./containerd.service
+}
+set_containerd_path
 
 # 函数：显示错误消息并退出
 error_exit() {

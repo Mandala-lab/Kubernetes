@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # 启用 POSIX 模式并设置严格的错误处理机制
-set -o posix -o errexit -o pipefail
+set -e -o posix -o pipefail
 
 # https://kubernetes.io/docs/concepts/extend-kubernetes/compute-storage-net/network-plugins/#support-traffic-shaping
 # CNI 网络插件还支持 Pod 入口和出口流量整形。您可以使用 CNI 插件团队提供的官方带宽插件，也可以使用您自己的具有带宽控制功能的插件
