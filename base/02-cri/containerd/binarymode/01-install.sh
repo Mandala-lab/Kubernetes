@@ -103,15 +103,23 @@ if [ -n "$github_proxy" ];then
     url="https://github.com/containerd/containerd/releases/download/v${VERSION}/containerd-${VERSION}-linux-${ARCH}.tar.gz"
 fi
 
+function download() {
+    wget -t 2 -T 240 -N -S "$url"
+    tar -zxvf containerd-"$VERSION"-linux-$ARCH.tar.gz -C /usr/local/
+}
+
 # 定义containerd的保存路径, 用于保存下载的Containerd二进制文件
 CONTAINERD_HOME="/home/containerd"
 mkdir -p $CONTAINERD_HOME
 cd $CONTAINERD_HOME || exit
 if [ -f "containerd-$VERSION-linux-$ARCH.tar.gz" ]; then
     echo "文件存在"
-    tar -zxvf containerd-"$VERSION"-linux-$ARCH.tar.gz -C /usr/local/
+    if tar -zxvf containerd-"$VERSION"-linux-$ARCH.tar.gz -C /usr/local/ -eq 2; then
+      echo "文件已损坏, 正在重新下载"
+      rm -rf containerd-"$VERSION"-linux-$ARCH.tar.gz
+      download
+    fi
 else
     echo "文件不存在"
-    wget -t 2 -T 240 -N -S "$url"
-    tar -zxvf containerd-"$VERSION"-linux-$ARCH.tar.gz -C /usr/local/
+    download
 fi
