@@ -1,9 +1,24 @@
 #!/bin/bash
 
 set -e -o posix -o pipefail
-[[ "$TRACE" ]] && set -x
+
+declare trace=false
+
+while [ "$#" -gt 0 ]; do
+    case "$1" in
+        --trace=*)
+            trace=true
+            shift
+            ;;
+        *)  # 处理未知选项
+            echo "Error: Unsupported argument $1."
+            exit 1
+            ;;
+    esac
+done
 
 main () {
+  "$trace" && set -x
   # 控制节点需要开启以下下端口:
   # 协议	方向	端口范围	目的	使用者
   # TCP	入站	6443	Kubernetes API server	所有
@@ -17,3 +32,5 @@ main () {
   sudo ufw allow 10259/tcp
   sudo ufw allow 10257/tcp
 }
+
+main "$trace"

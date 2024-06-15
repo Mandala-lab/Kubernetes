@@ -3,7 +3,20 @@
 # 配置Kubernetes所需要的基本依赖项, 例如内核参数, 启用和使用社区广泛推荐的内核参数
 
 set -e -o posix -o pipefail
-[[ "$TRACE" ]] && set -x
+declare trace=false
+
+while [ "$#" -gt 0 ]; do
+    case "$1" in
+        --trace=*)
+            trace=true
+            shift
+            ;;
+        *)  # 处理未知选项
+            echo "Error: Unsupported argument $1."
+            exit 1
+            ;;
+    esac
+done
 
 # 运行前清理
 pre_clear(){
@@ -284,6 +297,7 @@ EOF
 }
 
 main () {
+  "$trace" && set -x
   # 运行前清理
   pre_clear
 
@@ -311,4 +325,4 @@ main () {
   #sudo blkid | grep swap
 }
 
-main
+main "$trace"

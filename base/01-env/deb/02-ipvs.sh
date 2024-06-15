@@ -1,7 +1,20 @@
 #!/usr/bin/env bash
 # 启用 POSIX 模式并设置严格的错误处理机制
 set -o posix errexit -o pipefail
-[[ "$TRACE" ]] && set -x
+declare trace=false
+
+while [ "$#" -gt 0 ]; do
+    case "$1" in
+        --trace=*)
+            trace=true
+            shift
+            ;;
+        *)  # 处理未知选项
+            echo "Error: Unsupported argument $1."
+            exit 1
+            ;;
+    esac
+done
 
 # 删除旧配置
 pre_clear () {
@@ -52,6 +65,7 @@ EOF
 }
 
 main () {
+  "$trace" && set -x
   pre_clear
   install_pack
 
@@ -62,4 +76,4 @@ main () {
   cut -f1 -d " "  /proc/modules | grep -e ip_vs -e nf_conntrack
 }
 
-main
+main "$trace"
