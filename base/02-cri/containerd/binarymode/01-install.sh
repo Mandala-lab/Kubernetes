@@ -5,6 +5,8 @@
 
 set -o posix -o errexit -o pipefail
 
+unset "$CONTAINERD_HOME"
+
 # 设置containerd.service的默认路径
 if [ -z "${CONTAINERD_SERVICE}" ]; then
   export CONTAINERD_SERVICE="/etc/systemd/system/containerd.service"
@@ -71,7 +73,7 @@ done
 # 安装containerd
 # TODO 编写可动态获取版本的shell
 if [ "$VERSION" = "" ];then
-  export VERSION="1.7.17"
+  VERSION="1.7.17"
 fi
 
 if which ctr -eq 0 && $install != "n";then
@@ -102,7 +104,7 @@ if [ -n "$github_proxy" ];then
 fi
 
 # 定义containerd的保存路径, 用于保存下载的Containerd二进制文件
-export CONTAINERD_HOME="/home/containerd"
+CONTAINERD_HOME="/home/containerd"
 mkdir -p $CONTAINERD_HOME
 cd $CONTAINERD_HOME || exit
 if [ -f "containerd-$VERSION-linux-$ARCH.tar.gz" ]; then
@@ -113,5 +115,3 @@ else
     wget -t 2 -T 240 -N -S "$url"
     tar -zxvf containerd-"$VERSION"-linux-$ARCH.tar.gz -C /usr/local/
 fi
-
-set +x
