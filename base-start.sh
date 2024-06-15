@@ -7,7 +7,10 @@ set -o posix -o errexit -o pipefail -x
 chmod +x ./base/01-env/deb/01-config.sh
 ./base/01-env/deb/01-config.sh
 
-chmod +x ./base/01-env/deb/02-allow-port.sh
+chmod +x ./base/01-env/deb/02-ipvs.sh
+./base/01-env/deb/02-ipvs.sh
+
+chmod +x ./base/01-env/deb/03-allow-port.sh
 ./base/01-env/deb/02-allow-port.sh
 
 chmod +x ./base/02-cri/containerd/binarymode/01-install.sh

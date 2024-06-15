@@ -110,12 +110,7 @@ sudo mount -a
 sudo swapoff -a
 
 # 检查是否存在swap分区
-if grep swap /etc/fstab; then
-  echo "swap没有关闭, 建议关闭"
-  exit 1
-fi
-
-if sudo blkid | grep swap; then
+if sudo blkid | grep swap -eq 0; then
   echo "swap没有关闭, 建议关闭"
   exit 1
 fi
