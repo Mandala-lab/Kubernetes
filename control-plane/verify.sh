@@ -18,6 +18,12 @@ cat /etc/profile
 cat /etc/sysconfig/modules/k8s.modules
 cat /etc/sysctl.d/99-kubernetes-cri.conf
 
+if [ -z "${CONTAINERD_CONFIG_FILE_PATH}" ]; then
+  export CONTAINERD_CONFIG_FILE_PATH="/etc/containerd/config.toml"
+fi
+grep -nE "sandbox_image|SystemdCgroup" "$CONTAINERD_CONFIG_FILE_PATH"
+cat -n /etc/containerd/config.toml | grep -A 1 "\[plugins\.\"io\.containerd\.grpc\.v1\.cri\"\.registry\]"
+
 lsmod | grep br_netfilter
 lsmod | grep overlay
 

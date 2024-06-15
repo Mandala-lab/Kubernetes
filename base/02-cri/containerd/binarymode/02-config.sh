@@ -39,26 +39,80 @@ sed -i 's#SystemdCgroup = false#SystemdCgroup = true#g' "$CONTAINERD_CONFIG_FILE
 # 删除旧的containerd.service文件
 rm -rf ./containerd.service
 
+# 函数：显示错误消息并退出
+error_exit() {
+    echo "Error: Invalid argument value for $1. Expected 'y' or 'n'."
+    exit 1
+}
+
+github_proxy=""
+install=""
+# 解析命令行参数
+while [ "$#" -gt 0 ]; do
+    case "$1" in
+        --proxy=*)
+            value="${1#*=}"  # 提取等号后的值
+            if [ "$value" = "y" ]; then
+                github_proxy="https://mirror.ghproxy.com/"
+            elif [ "$value" = "n" ]; then
+                github_proxy=""
+            else
+                error_exit "$1"
+            fi
+            shift
+            ;;
+        --install=*)
+            value="${1#*=}"
+            if [ "$value" = "y" ] || [ "$value" = "n" ]; then
+                install="$value"
+            else
+                error_exit "$1"
+            fi
+            shift
+            ;;
+        *)  # 处理未知选项
+            echo "Error: Unsupported argument $1."
+            exit 1
+            ;;
+    esac
+done
+
+url=""
+if [ -n "$github_proxy" ];then
+  url="${github_proxy}https://raw.githubusercontent.com/containerd/containerd/main/containerd.service"
+  else
+    url="https://raw.githubusercontent.com/containerd/containerd/main/containerd.service"
+fi
+
 # 尝试从GitHub下载containerd.service文件，超时时间为10秒
-if ! curl -o containerd.service -m 10 https://raw.githubusercontent.com/containerd/containerd/main/containerd.service; then
+if ! wget -t 2 -T 30 -N -S $url; then
   echo "下载containerd.service失败, 正在使用内置的文件进行替换, 但可能不是最新的, 可以进行手动替换"
   cat > "$CONTAINERD_SERVICE" << EOF
 [Unit]
 Description=containerd container runtime
 Documentation=https://containerd.io
 After=network.target local-fs.target
+
 [Service]
 ExecStartPre=-/sbin/modprobe overlay
 ExecStart=/usr/local/bin/containerd
+
 Type=notify
 Delegate=yes
 KillMode=process
 Restart=always
 RestartSec=5
+
+# Having non-zero Limit*s causes performance problems due to accounting overhead
+# in the kernel. We recommend using cgroups to do container-local accounting.
 LimitNPROC=infinity
 LimitCORE=infinity
+
+# Comment TasksMax if your systemd version does not supports it.
+# Only systemd 226 and above support this version.
 TasksMax=infinity
 OOMScoreAdjust=-999
+
 [Install]
 WantedBy=multi-user.target
 EOF

@@ -74,11 +74,6 @@ sudo cat /sys/class/dmi/id/product_uuid
 sudo timedatectl status
 sudo timedatectl set-timezone Asia/Shanghai
 
-# 包管理器:
-# apt install -y runc
-
-# 设置控制节点与工作节点
-
 # 修改Hosts
 cp /etc/hosts{,.back}
 #cat >> /etc/hosts << EOF
@@ -138,55 +133,76 @@ fi
 # net.bridge.bridge-nf-call-iptables  : 启用控制 IPv4 数据包经过桥接时是否要经过 iptables 过滤
 # net.bridge.bridge-nf-call-ip6tables : 启用控制 IPv6 数据包经过桥接时是否要经过 ip6tables 过滤
 # net.ipv4.ip_forward                 : 启用 IPv4 数据包的转发功能
-cat <<EOF | sudo tee /etc/sysctl.d/99-kubernetes-cri.conf
+
+# 系统优化
+cat > /etc/sysctl.d/99-kubernetes-better.conf <<EOF
 net.bridge.bridge-nf-call-iptables        = 1
 net.bridge.bridge-nf-call-ip6tables       = 1
 net.ipv4.ip_forward                       = 1
-net.ipv4.tcp_slow_start_after_idle        = 0
-net.core.rmem_max                         = 16777216
-fs.inotify.max_user_watches               = 524288
-kernel.softlockup_all_cpu_backtrace       = 1
-kernel.softlockup_panic                   = 1
-fs.file-max                               = 2097152
-fs.nr_open                                = 2097152
-fs.inotify.max_user_instances             = 8192
-fs.inotify.max_queued_events              = 16384
-vm.max_map_count                          = 262144
-net.core.netdev_max_backlog               = 16384
-net.ipv4.tcp_wmem                         = 4096 12582912 16777216
-net.core.wmem_max                         = 16777216
-net.core.somaxconn                        = 32768
-net.ipv4.tcp_timestamps                   = 0
-net.ipv4.tcp_max_syn_backlog              = 8096
-net.bridge.bridge-nf-call-arptables       = 1
-net.ipv4.tcp_rmem                         = 4096 12582912 16777216
 vm.swappiness                             = 0
-kernel.sysrq                              = 1
-net.ipv4.neigh.default.gc_stale_time      = 120
-net.ipv4.conf.all.rp_filter               = 0
-net.ipv4.conf.default.rp_filter           = 0
-net.ipv4.conf.default.arp_announce        = 2
-net.ipv4.conf.lo.arp_announce             = 2
-net.ipv4.conf.all.arp_announce            = 2
-net.ipv4.tcp_max_tw_buckets               = 5000
-net.ipv4.tcp_syncookies                   = 1
-net.ipv4.tcp_synack_retries               = 2
-# net.ipv6.conf.lo.disable_ipv6            = 1
-# net.ipv6.conf.all.disable_ipv6           = 1
-# net.ipv6.conf.default.disable_ipv6       = 1
-net.ipv4.ip_local_port_range              = 1024 65535
-net.ipv4.tcp_keepalive_time               = 600
-net.ipv4.tcp_keepalive_probes             = 10
-net.ipv4.tcp_keepalive_intvl              = 30
-net.nf_conntrack_max                      = 25000000
+vm.overcommit_memory = 0
+vm.panic_on_oom = 0
+fs.inotify.max_user_instances             = 8192
+fs.inotify.max_user_watches               = 1048576
+fs.file-max                               = 52706963
+fs.nr_open =52706963
+net.ipv6.conf.all.disable_ipv6           = 1
 net.netfilter.nf_conntrack_max            = 25000000
-net.netfilter.nf_conntrack_tcp_timeout_established = 180
-net.netfilter.nf_conntrack_tcp_timeout_time_wait   = 120
-net.netfilter.nf_conntrack_tcp_timeout_close_wait  = 60
-net.netfilter.nf_conntrack_tcp_timeout_fin_wait    = 12
 EOF
-
 # 使配置生效:
+modprobe br_netfilter
+lsmod | grep br_netfilter
+modprobe conntrack
+
+# 系统优化
+#cat <<EOF | sudo tee /etc/sysctl.d/99-kubernetes-cri.conf
+#net.bridge.bridge-nf-call-iptables        = 1
+#net.bridge.bridge-nf-call-ip6tables       = 1
+#net.ipv4.ip_forward                       = 1
+#net.ipv4.tcp_slow_start_after_idle        = 0
+#net.core.rmem_max                         = 16777216
+#kernel.softlockup_all_cpu_backtrace       = 1
+#kernel.softlockup_panic                   = 1
+#fs.file-max                               = 2097152
+#fs.nr_open                                = 2097152
+#fs.inotify.max_user_instances             = 8192
+#fs.inotify.max_user_watches               = 524288
+#fs.inotify.max_queued_events              = 16384
+#vm.max_map_count                          = 262144
+#net.core.netdev_max_backlog               = 16384
+#net.ipv4.tcp_wmem                         = 4096 12582912 16777216
+#net.core.wmem_max                         = 16777216
+#net.core.somaxconn                        = 32768
+#net.ipv4.tcp_timestamps                   = 0
+#net.ipv4.tcp_max_syn_backlog              = 8096
+#net.bridge.bridge-nf-call-arptables       = 1
+#net.ipv4.tcp_rmem                         = 4096 12582912 16777216
+#vm.swappiness                             = 0
+#kernel.sysrq                              = 1
+#net.ipv4.neigh.default.gc_stale_time      = 120
+#net.ipv4.conf.all.rp_filter               = 0
+#net.ipv4.conf.default.rp_filter           = 0
+#net.ipv4.conf.default.arp_announce        = 2
+#net.ipv4.conf.lo.arp_announce             = 2
+#net.ipv4.conf.all.arp_announce            = 2
+#net.ipv4.tcp_max_tw_buckets               = 5000
+#net.ipv4.tcp_syncookies                   = 1
+#net.ipv4.tcp_synack_retries               = 2
+## net.ipv6.conf.lo.disable_ipv6            = 1
+#net.ipv6.conf.all.disable_ipv6           = 1
+## net.ipv6.conf.default.disable_ipv6       = 1
+#net.ipv4.ip_local_port_range              = 1024 65535
+#net.ipv4.tcp_keepalive_time               = 600
+#net.ipv4.tcp_keepalive_probes             = 10
+#net.ipv4.tcp_keepalive_intvl              = 30
+#net.nf_conntrack_max                      = 25000000
+#net.netfilter.nf_conntrack_max            = 25000000
+#net.netfilter.nf_conntrack_tcp_timeout_established = 180
+#net.netfilter.nf_conntrack_tcp_timeout_time_wait   = 120
+#net.netfilter.nf_conntrack_tcp_timeout_close_wait  = 60
+#net.netfilter.nf_conntrack_tcp_timeout_fin_wait    = 12
+#EOF
+
 sysctl --system
 
 # 文件限制
@@ -224,44 +240,10 @@ EOF
 source /etc/profile
 cat /etc/profile
 
-## 加载内核
 
-if [ -f /etc/sysconfig/modules/k8s.modules ];then
-    rm -f /etc/sysconfig/modules/k8s.modules
-fi
-
-mkdir -pv /etc/sysconfig/modules
-touch /etc/sysconfig/modules/k8s.modules
-chmod +x /etc/sysconfig/modules/k8s.modules
-
-cat > ipvs.sh <<EOF
-ipvs_mods_dir="/usr/lib/modules/$(uname -r)/kernel/net/netfilter/ipvs"
-for i in \$(ls \$ipvs_mods_dir|grep -o "^[^.]*" )
-do
-  /sbin/modinfo -F filename \$i &>/dev/null
-  if [ \$? -eq 0 ];then
-        /sbin/modprobe \$i
-        echo "/sbin/modprobe \$i" >> /etc/sysconfig/modules/k8s.modules
-  fi
-done
-EOF
-
-source ./ipvs.sh
-cat /etc/sysconfig/modules/k8s.modules
-
-echo "通过运行以下命令验证是否加载了`overlay`模块"
-
+echo "查看`overlay`模块是否加载"
 lsmod | grep overlay
 
-apt install ipset ipvsadm -y
-
-# 使用命令查看是否已经正确加载所需的内核模块:
-lsmod | grep -e ip_vs -e nf_conntrack
-
-cut -f1 -d " "  /proc/modules | grep -e ip_vs -e nf_conntrack
-
-echo "/etc/sysctl.d/99-kubernetes-cri.conf:"
-cat /etc/sysctl.d/99-kubernetes-cri.conf
 cat /etc/security/limits.conf
 cat /etc/profile
 #echo "blkid | grep swap: 为空就正常"
