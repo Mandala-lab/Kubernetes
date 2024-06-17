@@ -3,34 +3,75 @@
 # 并针对国内服务器进行优化
 # 添加镜像拉取的源替换为国内的镜像源
 
-set -e -o posix -o pipefail
+set -e -o posix -o pipefail -x
 
-unset "$CONTAINERD_HOME"
+declare github_proxy=false
+declare github_proxy_url=""
+declare install=false
+declare version="1.7.17"
+declare url=""
 
-# 设置containerd.service的默认路径
-if [ -z "${CONTAINERD_SERVICE}" ]; then
-  export CONTAINERD_SERVICE="/etc/systemd/system/containerd.service"
-fi
-# 设置containerd配置文件config.toml的路径
-if [ -z "${CONTAINERD_CONFIG_FILE_PATH}" ]; then
-  export CONTAINERD_CONFIG_FILE_PATH="/etc/containerd/config.toml"
-fi
+while [[ $# -gt 0 ]]; do
+  case $1 in
+    --proxy)
+      github_proxy=true
+      github_proxy_url="https://mirror.ghproxy.com"
+      ;;
+    --proxy_url=*)
+      github_proxy_url="${1#*=}"
+      ;;
+    --install)
+      install=true
+      ;;
+    --version=*)
+      version="${1#*=}"
+      ;;
+    --url=*)
+      url="${1#*=}"
+      ;;
+    *)
+      echo "未知的命令行选项参数: $1"
+      exit 1
+      ;;
+  esac
+  shift
+done
+# 返回解析后的参数值
+echo "proxy:$github_proxy install:$install version:$version"
 
-# 删除之前的
-rm -rf /opt/containerd/
-rm -rf /usr/bin/ctr
-rm -rf /etc/containerd/
-rm -rf $CONTAINERD_SERVICE
-rm -rf $CONTAINERD_CONFIG_FILE_PATH
-rm -rf /etc/modules-load.d/containerd.conf
-rm -rf /etc/sysctl.d/99-kubernetes-cri.conf
+pre_clear () {
+  unset "$CONTAINERD_HOME"
 
-hash -r
+  # 设置containerd.service的默认路径
+  if [ -z "${CONTAINERD_SERVICE}" ]; then
+    export CONTAINERD_SERVICE="/etc/systemd/system/containerd.service"
+  fi
+  # 设置containerd配置文件config.toml的路径
+  if [ -z "${CONTAINERD_CONFIG_FILE_PATH}" ]; then
+    export CONTAINERD_CONFIG_FILE_PATH="/etc/containerd/config.toml"
+  fi
+
+  # 删除之前的
+  rm -rf /opt/containerd/
+  rm -rf /usr/bin/ctr
+  rm -rf /etc/containerd/
+  rm -rf $CONTAINERD_SERVICE
+  rm -rf $CONTAINERD_CONFIG_FILE_PATH
+  rm -rf /etc/modules-load.d/containerd.conf
+  rm -rf /etc/sysctl.d/99-kubernetes-cri.conf
+
+  hash -r
+}
 
 # 函数：显示错误消息并退出
 errorExit() {
     echo "Error: Invalid argument value for $1. Expected 'y' or 'n'."
     exit 1
+}
+
+download() {
+    wget -t 2 -T 240 -N -S "$url"
+    tar -zxvf containerd-"$version"-linux-"$ARCH".tar.gz -C /usr/local/
 }
 
 installContainerd() {
@@ -40,7 +81,8 @@ installContainerd() {
     version="1.7.17"
   fi
 
-  if which ctr && [ "$install" != "n" ];then
+  echo "install: $install"
+  if which ctr && [[ "$install" == false ]];then
     echo "containerd已经安装"
     ctr -v
     exit 0
@@ -55,11 +97,11 @@ installContainerd() {
       if ! tar -zxvf containerd-"$version"-linux-$ARCH.tar.gz -C /usr/local/; then
         echo "文件已损坏, 正在重新下载"
         rm -rf containerd-"$version"-linux-$ARCH.tar.gz
-        download
+        download "$url"
       fi
   else
       echo "文件不存在"
-      download
+      download "$url"
   fi
 
 }
@@ -79,60 +121,27 @@ set_arch() {
 
   echo "ARCH=${ARCH}"
 }
-set_arch
 
-function set_proxy() {
-    if [ -n "$github_proxy" ];then
-      url="${github_proxy}https://github.com/containerd/containerd/releases/download/v${version}/containerd-${version}-linux-${ARCH}.tar.gz"
-      else
-        url="https://github.com/containerd/containerd/releases/download/v${version}/containerd-${version}-linux-${ARCH}.tar.gz"
-    fi
-}
-set_proxy $url
+set_url () {
+  if [[ -z $url ]];then
+   echo "set default url"
+   url="https://github.com/containerd/containerd/releases/download/v${version}/containerd-${version}-linux-${ARCH}.tar.gz"
+  fi
 
-download() {
-    wget -t 2 -T 240 -N -S "$url"
-    tar -zxvf containerd-"$version"-linux-$ARCH.tar.gz -C /usr/local/
+  echo "github_proxy_url: $github_proxy_url"
+  echo "url: $url"
+
+  if [[ -n "$github_proxy" && "$url" ]];then
+   echo "set proxy url"
+   url="${github_proxy_url}/${url}"
+  fi
 }
 
 main() {
-
-local github_proxy=""
-local install=""
-local version=""
-
-# 解析命令行参数
-while [ "$#" -gt 0 ]; do
-    case "$1" in
-        --proxy=*)
-            value="${1#*=}"  # 提取等号后的值
-            if [ "$value" = "y" ]; then
-                github_proxy="https://mirror.ghproxy.com/"
-            elif [ "$value" = "n" ]; then
-                github_proxy=""
-            else
-                error_exit "$1"
-            fi
-            shift
-            ;;
-        --install=*)
-            value="${1#*=}"
-            if [ "$value" = "y" ] || [ "$value" = "n" ]; then
-                install="$value"
-            else
-                error_exit "$1"
-            fi
-            shift
-            ;;
-        --version=*)
-            version="${1#*=}"
-            shift
-            ;;
-        *)  # 处理未知选项
-            echo "Error: Unsupported argument $1."
-            exit 1
-            ;;
-    esac
-done
+  pre_clear
+  set_arch
+  set_url "$url"
+  installContainerd "$install" "$ARCH" "$url"
 }
+
 main "$@"

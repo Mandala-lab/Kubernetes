@@ -3,11 +3,39 @@
 # 并针对国内服务器进行优化
 # 添加镜像拉取的源替换为国内的镜像源
 
-set -e -o posix -o pipefail
+set -e -o posix -o pipefail -x
 
-[[ "$TRACE" ]] && set -x
+declare github_proxy=false
+declare github_proxy_url=""
+declare install=false
+declare url=""
 
-set_containerd_path(){
+while [[ $# -gt 0 ]]; do
+  case $1 in
+    --proxy)
+      github_proxy=true
+      github_proxy_url="https://mirror.ghproxy.com"
+      ;;
+    --proxy_url=*)
+      github_proxy_url="${1#*=}"
+      ;;
+    --install)
+      install=true
+      ;;
+    --url=*)
+      url="${1#*=}"
+      ;;
+    *)
+      echo "未知的命令行选项参数: $1"
+      exit 1
+      ;;
+  esac
+  shift
+done
+# 返回解析后的参数值
+echo "proxy:$github_proxy install:$install"
+
+set_containerd_path() {
   # 设置containerd.service的默认路径
   if [ -z "${CONTAINERD_SERVICE}" ]; then
     export CONTAINERD_SERVICE="/etc/systemd/system/containerd.service"
@@ -42,7 +70,6 @@ set_containerd_path(){
   # 删除旧的containerd.service文件
   rm -rf ./containerd.service
 }
-set_containerd_path
 
 # 函数：显示错误消息并退出
 error_exit() {
@@ -50,49 +77,26 @@ error_exit() {
     exit 1
 }
 
-github_proxy=""
-install=""
-# 解析命令行参数
-while [ "$#" -gt 0 ]; do
-    case "$1" in
-        --proxy=*)
-            value="${1#*=}"  # 提取等号后的值
-            if [ "$value" = "y" ]; then
-                github_proxy="https://mirror.ghproxy.com/"
-            elif [ "$value" = "n" ]; then
-                github_proxy=""
-            else
-                error_exit "$1"
-            fi
-            shift
-            ;;
-        --install=*)
-            value="${1#*=}"
-            if [ "$value" = "y" ] || [ "$value" = "n" ]; then
-                install="$value"
-            else
-                error_exit "$1"
-            fi
-            shift
-            ;;
-        *)  # 处理未知选项
-            echo "Error: Unsupported argument $1."
-            exit 1
-            ;;
-    esac
-done
+set_url () {
+  if [[ -z $url ]];then
+   echo "set default url"
+   url="https://raw.githubusercontent.com/containerd/containerd/main/containerd.service"
+  fi
 
-url=""
-if [ -n "$github_proxy" ];then
-  url="${github_proxy}https://raw.githubusercontent.com/containerd/containerd/main/containerd.service"
-  else
-    url="https://raw.githubusercontent.com/containerd/containerd/main/containerd.service"
-fi
+  echo "github_proxy_url: $github_proxy_url"
+  echo "url: $url"
+
+  if [[ -n "$github_proxy" && "$url" ]];then
+   echo "set proxy url"
+   url="${github_proxy_url}/${url}"
+  fi
+}
 
 # 尝试从GitHub下载containerd.service文件，超时时间为10秒
-if ! wget -t 2 -T 30 -N -S $url; then
-  echo "下载containerd.service失败, 正在使用内置的文件进行替换, 但可能不是最新的, 可以进行手动替换"
-  cat > "$CONTAINERD_SERVICE" << EOF
+download_ctr_service () {
+  if ! wget -t 2 -T 30 -N -S "$url"; then
+    echo "下载containerd.service失败, 正在使用内置的文件进行替换, 但可能不是最新的, 可以进行手动替换"
+    cat > "$CONTAINERD_SERVICE" << EOF
 [Unit]
 Description=containerd container runtime
 Documentation=https://containerd.io
@@ -121,35 +125,48 @@ OOMScoreAdjust=-999
 [Install]
 WantedBy=multi-user.target
 EOF
-else
-  # 如果下载成功，使用sudo命令将containerd.service内容写入CONTAINERD_SERVICE文件
-  sudo cat containerd.service | sudo tee "$CONTAINERD_SERVICE"
-fi
+  else
+    # 如果下载成功，使用sudo命令将containerd.service内容写入CONTAINERD_SERVICE文件
+    sudo cat containerd.service | sudo tee "$CONTAINERD_SERVICE"
+  fi
+}
 
 # 所有节点均需安装与配置, 根据实际需求, 推荐Kubernetes安装v1.24版本以上使用containerd. 本教程只使用containerd
 # 创建/etc/modules-load.d/containerd.conf配置文件，确保在系统启动时自动加载所需的内核模块，以满足容器运行时的要求
 # 安装程序需要系统参数，这些参数会在重新启动时持续存在。
-cat <<EOF | sudo tee /etc/modules-load.d/containerd.conf
+set_containerd_config () {
+  cat <<EOF | sudo tee /etc/modules-load.d/containerd.conf
 overlay
 br_netfilter
 EOF
 
-lsmod | grep br_netfilter
+  lsmod | grep br_netfilter
 
-# 应用 sysctl 参数而无需重新启动
-sudo sysctl --system
+  # 应用 sysctl 参数而无需重新启动
+  sudo sysctl --system
 
-systemctl daemon-reload
-systemctl enable --now containerd
-systemctl restart containerd
-#systemctl status containerd
+  systemctl daemon-reload
+  systemctl enable --now containerd
+  systemctl restart containerd
+  #systemctl status containerd
+}
 
-# 校验配置文件
-grep -nE "sandbox_image|SystemdCgroup" "$CONTAINERD_CONFIG_FILE_PATH"
+verify() {
+  # 校验配置文件
+  grep -nE "sandbox_image|SystemdCgroup" "$CONTAINERD_CONFIG_FILE_PATH"
 
-cat /etc/modules-load.d/containerd.conf
+  cat /etc/modules-load.d/containerd.conf
 
-ctr -v
-which containerd
+  ctr -v
+  which containerd
+}
 
+main () {
+  set_containerd_path
+  set_url "$url"
+  download_ctr_service "$url"
+  set_containerd_config
+  verify
+}
 
+main "$@"
