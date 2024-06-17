@@ -74,19 +74,23 @@ download() {
     tar -zxvf containerd-"$version"-linux-"$ARCH".tar.gz -C /usr/local/
 }
 
-installContainerd() {
+is_install () {
+   echo "install: $install"
+   if which ctr && [[ "$install" == false ]];then
+     echo "containerd已经安装"
+     ctr -v
+     exit 0
+   fi
+}
+
+install_containerd() {
   # 安装containerd
   # TODO 编写可动态获取版本的shell
   if [ "$version" = "" ];then
     version="1.7.17"
   fi
 
-  echo "install: $install"
-  if which ctr && [[ "$install" == false ]];then
-    echo "containerd已经安装"
-    ctr -v
-    exit 0
-  fi
+  is_install "$install"
 
   # 定义containerd的保存路径, 用于保存下载的Containerd二进制文件
   CONTAINERD_HOME="/home/containerd"
@@ -141,7 +145,7 @@ main() {
   pre_clear
   set_arch
   set_url "$url"
-  installContainerd "$install" "$ARCH" "$url"
+  install_containerd "$install" "$ARCH" "$url"
 }
 
 main "$@"
