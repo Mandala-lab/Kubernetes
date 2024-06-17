@@ -12,7 +12,7 @@ while [[ $# -gt 0 ]]; do
   case $1 in
     --proxy)
       github_proxy=true
-      github_proxy_url="https://mirror.ghproxy.com"
+      github_proxy_url="https://mirror.ghproxy.com/"
       ;;
     --proxy_url=*)
       github_proxy_url="${1#*=}"
@@ -63,7 +63,7 @@ set_url () {
 
   if [[ -n "$github_proxy" && "$url" ]];then
    echo "set proxy url"
-   url="${github_proxy_url}/${url}"
+   url="${github_proxy_url}${url}"
   fi
 }
 

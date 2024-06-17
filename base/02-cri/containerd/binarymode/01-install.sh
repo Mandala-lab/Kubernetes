@@ -15,7 +15,7 @@ while [[ $# -gt 0 ]]; do
   case $1 in
     --proxy)
       github_proxy=true
-      github_proxy_url="https://mirror.ghproxy.com"
+      github_proxy_url="https://mirror.ghproxy.com/"
       ;;
     --proxy_url=*)
       github_proxy_url="${1#*=}"
@@ -85,11 +85,6 @@ is_install () {
 
 install_containerd() {
   # 安装containerd
-  # TODO 编写可动态获取版本的shell
-  if [ "$version" = "" ];then
-    version="1.7.17"
-  fi
-
   is_install "$install"
 
   # 定义containerd的保存路径, 用于保存下载的Containerd二进制文件
@@ -137,7 +132,7 @@ set_url () {
 
   if [[ -n "$github_proxy" && "$url" ]];then
    echo "set proxy url"
-   url="${github_proxy_url}/${url}"
+   url="${github_proxy_url}${url}"
   fi
 }
 
