@@ -71,12 +71,6 @@ set_containerd_path() {
   rm -rf ./containerd.service
 }
 
-# 函数：显示错误消息并退出
-error_exit() {
-    echo "Error: Invalid argument value for $1. Expected 'y' or 'n'."
-    exit 1
-}
-
 set_url () {
   if [[ -z $url ]];then
    echo "set default url"

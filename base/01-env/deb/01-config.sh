@@ -2,8 +2,7 @@
 #
 # 配置Kubernetes所需要的基本依赖项, 例如内核参数, 启用和使用社区广泛推荐的内核参数
 
-set -e -o posix -o pipefail
-declare trace=false
+set -e -o posix -o pipefail -x
 
 while [ "$#" -gt 0 ]; do
     case "$1" in

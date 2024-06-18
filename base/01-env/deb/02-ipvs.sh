@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
 # 启用 POSIX 模式并设置严格的错误处理机制
-set -o posix errexit -o pipefail
-declare trace=false
+set -o posix errexit -o pipefail -x
 
 while [ "$#" -gt 0 ]; do
     case "$1" in
@@ -65,7 +64,6 @@ EOF
 }
 
 main () {
-  "$trace" && set -x
   pre_clear
   install_pack
 

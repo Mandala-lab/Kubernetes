@@ -6,9 +6,9 @@ MASTER_HOST_IP="159.75.231.54"
 MASTER_HOST_PORT=6443
 CONTROL_PLANE_ENDPOINT=$MASTER_HOST_IP:$MASTER_HOST_PORT
 MASTER_NODE_NAME="node1"
-CERT_SA_NS=(159.75.231.54 node1)
+CERT_SA_NS=(192.168.3.101 node1)
 KUBERNETES_VERSION="1.30.1"
-IMAGE_REPOSITORY=""
+IMAGE_REPOSITORY="registry.aliyuncs.com/google_containers"
 POD_SUBNET="10.244.0.0/24"
 SERVICE_SUBNET="10.96.0.0/16"
 
@@ -42,7 +42,7 @@ localAPIEndpoint:
   # Kubernetes API 服务器监听的端口
   bindPort: $MASTER_HOST_PORT
 nodeRegistration:
-  name: "node1" # 该控制节点的名称, 也就是出现在kubectl get no的名称
+  name: $MASTER_NODE_NAME # 该控制节点的名称, 也就是出现在kubectl get no的名称
   # CRI（容器运行时接口）的通信 socket 用来读取容器运行时的信息。 此信息会被以注解的方式添加到 Node API 对象至上，用于后续用途。
   criSocket: unix:///var/run/containerd/containerd.sock
   # 镜像拉取策略。 这两个字段的值必须是 "Always"、"Never" 或 "IfNotPresent" 之一。 默认值是 "IfNotPresent"，也是添加此字段之前的默认行为
@@ -102,7 +102,7 @@ etcd:
 #   certFile: "/etcd/kubernetes/pki/etcd/etcd.crt"
 #   keyFile: "/etcd/kubernetes/pki/etcd/etcd.key"
 #imageRepository: k8s.kubesre.xyz # 镜像源
-imageRepository: registry.aliyuncs.com/google_containers # 镜像源
+imageRepository: $IMAGE_REPOSITORY # 镜像源
 # 为控制面设置一个稳定的 IP 地址或 DNS 名称。
 # 取值可以是一个合法的 IP 地址或者 RFC-1123 形式的 DNS 子域名，二者均可以带一个 可选的 TCP 端口号。
 # 如果 controlPlaneEndpoint 未设置，则使用 advertiseAddress + bindPort。 如果设置了 controlPlaneEndpoint，但未指定 TCP 端口号，则使用 bindPort。

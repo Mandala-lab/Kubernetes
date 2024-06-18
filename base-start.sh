@@ -29,7 +29,7 @@ chmod +x ./base/02-cri/containerd/binarymode/03-install-runc.sh
 ./base/02-cri/containerd/binarymode/03-install-runc.sh --proxy=y --install=y
 
 chmod +x ./base/02-cri/containerd/binarymode/03-repo.sh
-./base/02-cri/containerd/binarymode/03-repo.sh
+./base/02-cri/containerd/binarymode/03-repo.sh --http_proxy="http://192.168.3.220:7890" --https_proxy="http://192.168.3.220:7890"
 
 # --remove 可选值: y, n
 # y: 删除旧安装
