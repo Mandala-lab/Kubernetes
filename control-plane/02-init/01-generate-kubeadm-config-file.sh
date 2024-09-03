@@ -28,7 +28,7 @@ cat > kubeadm-init-conf.yaml <<EOF
 apiVersion: kubeadm.k8s.io/v1beta3
 kind: InitConfiguration
 bootstrapTokens:
-  - groups:
+  - groups:certSANs
       # 指定用于节点引导的安全组
       - system:bootstrappers:kubeadm:default-node-token
     token: "9a08jv.c0izixklcxtmnze7"

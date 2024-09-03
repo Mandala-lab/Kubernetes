@@ -19,10 +19,11 @@
 1. kubernetes 1.25.X
 2. kubernetes 1.26.X
 3. kubernetes 1.27.X
-4. kubernetes 1.28.X
-5. kubernetes 1.29.X
-6. kubernetes 1.29.X
-6. kubernetes 1.30.X
+4. kubernetes 1.28.X (已验证)
+5. kubernetes 1.29.X (已验证)
+6. kubernetes 1.29.X (已验证)
+6. kubernetes 1.30.X (已验证)
+6. kubernetes 1.31.X (已验证)
 
 ### 本项目支持的[CRI]():
 

@@ -22,22 +22,6 @@ if kubeadm init phase preflight --dry-run --config kubeadm-init-conf.yaml; then
   sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
   sudo chown $(id -u):$(id -g) $HOME/.kube/config
 
-  # shell自动完成
-  apt-get install bash-completion
-  ##or
-  #yum install bash-completion
-  type _init_completion
-  source /usr/share/bash-completion/bash_completion
-
-  # 命令补全
-  kubectl completion bash | sudo tee /etc/bash_completion.d/kubectl > /dev/null
-  sudo chmod a+r /etc/bash_completion.d/kubectl
-
-  # 别名
-  echo 'alias k=kubectl' >>~/.bashrc
-  echo 'complete -o default -F __start_kubectl k' >>~/.bashrc
-  source ~/.bashrc
-else
-  echo "命令执行失败"
-  kubeadm reset -f
+# 重新生成token
+# kubeadm token create --print-join-command
 fi

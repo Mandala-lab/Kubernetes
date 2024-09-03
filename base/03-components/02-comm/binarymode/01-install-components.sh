@@ -88,6 +88,8 @@ echo "Detected architecture: $ARCH"
 RELEASE="$(curl -sSL https://dl.k8s.io/release/stable.txt)"
 #RELEASE="v1.30.2"
 ARCH="amd64"
+
+DOWNLOAD_DIR="/usr/local/bin"
 cd $DOWNLOAD_DIR || exit
 sudo curl -L --remote-name-all https://dl.k8s.io/release/${RELEASE}/bin/linux/${ARCH}/{kubeadm,kubelet}
 sudo chmod +x {kubeadm,kubelet}
@@ -96,6 +98,22 @@ RELEASE_VERSION="v0.17.0"
 curl -sSL "https://raw.githubusercontent.com/kubernetes/release/${RELEASE_VERSION}/cmd/krel/templates/latest/kubelet/kubelet.service" | sed "s:/usr/bin:${DOWNLOAD_DIR}:g" | sudo tee /usr/lib/systemd/system/kubelet.service
 sudo mkdir -p /usr/lib/systemd/system/kubelet.service.d
 curl -sSL "https://raw.githubusercontent.com/kubernetes/release/${RELEASE_VERSION}/cmd/krel/templates/latest/kubeadm/10-kubeadm.conf" | sed "s:/usr/bin:${DOWNLOAD_DIR}:g" | sudo tee /usr/lib/systemd/system/kubelet.service.d/10-kubeadm.conf
+
+# 检查kubelet的二进制文件路径与预定义的路径是否一致
+## 使用 `which` 命令获取 `kubelet` 的路径
+actual_path=$(which kubelet)
+
+## 检查 `kubelet` 是否存在于预期的路径
+if [ "$actual_path" = "$DOWNLOAD_DIR/kubelet" ]; then
+    echo "kubelet 已正确安装于路径: $actual_path"
+else
+    echo "kubelet 未正确安装于路径"
+    if [ -n "$actual_path" ]; then
+        echo "实际路径: $actual_path"
+    else
+        echo "kubelet 未安装"
+    fi
+fi
 
 # kubeadm
 if [ -f "$DOWNLOAD_HOME/kubeadm" ] && [ -f "$DOWNLOAD_HOME/kubeadm.sha256" ]; then
@@ -109,7 +127,7 @@ if [ -f "$DOWNLOAD_HOME/kubeadm" ] && [ -f "$DOWNLOAD_HOME/kubeadm.sha256" ]; th
     sudo cp ./kubeadm /usr/local/bin/
     sudo chmod +x /usr/local/bin/kubeadm
 else
-    echo "kubelet.service 不存在"
+    echo "kubeadm: kubelet.service 不存在"
     curl -LO "https://dl.k8s.io/release/${RELEASE}/bin/linux/${ARCH}/{kubeadm,kubeadm.sha256}"
     #sudo wget https://dl.k8s.io/release/"${RELEASE}"/bin/linux/${ARCH}/{kubeadm,kubeadm.sha256}
     if echo "$(cat kubeadm.sha256) kubeadm" | sha256sum -c; then
@@ -133,7 +151,7 @@ if [ -f "$DOWNLOAD_HOME/kubelet" ] && [ -f "$DOWNLOAD_HOME/kubelet.sha256" ]; th
     sudo cp ./kubelet /usr/local/bin/
     sudo chmod +x /usr/local/bin/kubelet
 else
-    echo "kubelet.service 不存在"
+    echo "kubelet: kubelet.service 不存在"
     sudo curl -LO "https://dl.k8s.io/release/${RELEASE}/bin/linux/${ARCH}/{kubelet,kubelet.sha256}"
     #sudo wget https://dl.k8s.io/release/"${RELEASE}"/bin/linux/${ARCH}/{kubelet,kubelet.sha256}
     if echo "$(cat kubelet.sha256) kubelet" | sha256sum -c; then
@@ -145,32 +163,6 @@ else
     fi
 fi
 
-# kubectl
-if [ -f "$DOWNLOAD_HOME/kubectl" ] && [ -f "$DOWNLOAD_HOME/kubectl.sha256" ]; then
-    if echo "$(cat kubectl.sha256) kubectl" | sha256sum -c; then
-      echo "kubectl 的SHA256 校验成功"
-    else
-      echo "kubectl 的SHA256 校验失败，退出并报错"
-      rm -rf kubectl kubectl.sha256
-      exit 1
-    fi
-    DOWNLOAD_DIR="/usr/local/bin"
-    rm -rf $DOWNLOAD_DIR/kubectl
-    sudo install -o root -g root -m 0755 kubectl $DOWNLOAD_DIR/kubectl
-else
-    echo "kubectl.service 不存在"
-    #sudo curl -LO "https://dl.k8s.io/release/${RELEASE}/bin/linux/${ARCH}/{kubectl,kubectl.sha256}"
-    sudo wget -t 2 -T 240 -N -S https://dl.k8s.io/release/"${RELEASE}"/bin/linux/${ARCH}/{kubectl,kubectl.sha256}
-    if echo "$(cat kubectl.sha256) kubectl" | sha256sum -c; then
-      echo "kubectl 的SHA256 校验成功"
-    else
-      echo "kubectl 的SHA256 校验失败，退出并报错"
-      rm -rf kubectl kubectl.sha256
-      exit 1
-    fi
-    DOWNLOAD_DIR="/usr/local/bin"
-    sudo install -o root -g root -m 0755 kubectl $DOWNLOAD_DIR/kubectl
-fi
 
 # 并添加 kubelet 系统服务
 # 查看 https://github.com/kubernetes/release/tree/master 获取RELEASE_VERSION的版本号
@@ -182,7 +174,7 @@ if [ -f "$DOWNLOAD_HOME/kubelet.service" ]; then
     echo "kubelet.service 存在，将其删除"
     rm $DOWNLOAD_HOME/kubelet.service
 else
-    echo "kubelet.service 不存在"
+    echo "kubelet.service 不存在, 不执行删除操作"
 fi
 
 # v0.16.4的https://raw.githubusercontent.com/kubernetes/release/${RELEASE_VERSION}/cmd/krel/templates/latest/kubelet/kubelet.service文件内容是:
@@ -201,7 +193,7 @@ fi
 # [Install]
 # WantedBy=multi-user.target
 
-DOWNLOAD_DIR="/usr/bin"
+DOWNLOAD_DIR="/usr/local/bin"
 rm -rf /usr/lib/systemd/system/kubelet.service
 rm -rf /usr/lib/systemd/system/kubelet.service.d/10-kubeadm.conf
 if ! wget -t 2 -T 240 -N -S -q "https://raw.githubusercontent.com/kubernetes/release/${RELEASE_VERSION}/cmd/krel/templates/latest/kubelet/kubelet.service"; then
@@ -240,7 +232,6 @@ if [ -f "$DOWNLOAD_HOME/10-kubeadm.conf" ]; then
     rm $DOWNLOAD_HOME/kubelet.service
 fi
 
-DOWNLOAD_DIR="/usr/bin"
 sudo mkdir -p /etc/systemd/system/kubelet.service.d
 if ! wget -t 2 -T 240 -N -S -q "https://raw.githubusercontent.com/kubernetes/release/${RELEASE_VERSION}/cmd/krel/templates/latest/kubeadm/10-kubeadm.conf"; then
   echo "下载失败, 正在使用内置的文件进行替换, 但可能不是最新的, 可以进行手动替换"
@@ -285,12 +276,6 @@ systemctl status kubelet
 
 systemctl restart containerd
 
-kubeadm version
-kubelet --version
-kubectl version --client
-
-# 查看版本的详细视图
-# kubectl version --client --output=yaml
 
 # 注意：如果 ipvs 模式成功打开，您应该会看到 IPVS 代理规则（使用 ipvsadm ），例如
 # ipvsadm -ln
