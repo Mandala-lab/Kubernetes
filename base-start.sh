@@ -14,7 +14,7 @@ chmod +x ./base/01-env/deb/03-allow-port.sh
 ./base/01-env/deb/03-allow-port.sh
 
 chmod +x ./base/02-cri/containerd/binarymode/01-install.sh
-./base/02-cri/containerd/binarymode/01-install.sh --proxy=y --install=n --version="1.7.17"
+./base/02-cri/containerd/binarymode/01-install.sh --proxy=y --install=n --version="1.7.21"
 
 chmod +x ./base/02-cri/containerd/binarymode/02-config.sh
 ./base/02-cri/containerd/binarymode/02-config.sh
@@ -26,7 +26,7 @@ chmod +x ./base/02-cri/containerd/binarymode/02-config.sh
 # y: 当前系统是否安装, 都重新下载并安装
 # n: 如果当前系统存在, 那么跳过下载与安装
 chmod +x ./base/02-cri/containerd/binarymode/03-install-runc.sh
-./base/02-cri/containerd/binarymode/03-install-runc.sh --proxy=y --install=y
+./base/02-cri/containerd/binarymode/03-install-runc.sh --proxy=y --install
 
 chmod +x ./base/02-cri/containerd/binarymode/03-repo.sh
 ./base/02-cri/containerd/binarymode/03-repo.sh --http_proxy="http://192.168.3.220:7890" --https_proxy="http://192.168.3.220:7890"
@@ -42,4 +42,4 @@ chmod +x ./base/03-components/deb/template.sh
 # CRICTL_VERSION: 版本, 例如v1.30.0
 # ARCH: 架构, 例如, amd64
 chmod +x ./base/03-components/01-crictl/01-install.sh
-./base/03-components/01-crictl/01-install.sh --proxy=y --install=y --version="v1.30.0"
+./base/03-components/01-crictl/01-install.sh --proxy=y --install=y --version="v1.31.1"

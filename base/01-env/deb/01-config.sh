@@ -193,6 +193,7 @@ EOF
   modprobe -- nf_conntrack
   lsmod | grep nf_conntrack
 
+  mkdir -p /etc/sysconfig/modules
   cat > /etc/sysconfig/modules/kubernetes.module <<EOF
 modprobe br_netfilter
 #modprobe overlay
