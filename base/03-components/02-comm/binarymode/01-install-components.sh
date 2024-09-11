@@ -266,7 +266,14 @@ EOF
 cat /etc/systemd/system/kubelet.service.d/10-kubeadm.conf
 
 # 清理旧的安装信息
-which kubeadm kubelet kubectl
+which kubeadm kubelet
+echo "which kubectl"
+if [[ -n $(which kubectl) ]]; then
+  echo "kubectl已安装"
+  else
+    echo "kubectl未找到,如果是工作节点, 可忽略"
+fi
+
 hash -r
 
 systemctl daemon-reload
@@ -275,6 +282,7 @@ systemctl enable --now kubelet
 systemctl status kubelet
 
 systemctl restart containerd
+systemctl restart kubelet
 
 
 # 注意：如果 ipvs 模式成功打开，您应该会看到 IPVS 代理规则（使用 ipvsadm ），例如
