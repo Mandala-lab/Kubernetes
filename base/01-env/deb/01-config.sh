@@ -306,6 +306,62 @@ EOF
 
 }
 
+install_base_comm() {
+   sudo apt update && sudo apt install -y apt-transport-https ca-certificates curl gpg
+}
+
+set_time_zone() {
+  echo "设置时区"
+  date
+  timedatectl set-timezone Asia/Shanghai
+}
+
+set_time() {
+  echo "使用ntpdate命令同步时间"
+  sudo apt install ntpdate
+  sudo ntpdate time1.aliyun.com
+}
+
+set_ufw() {
+  sudo ufw disable
+  sudo ufw status
+}
+
+install_ipvs() {
+  echo "下载IPVS"
+  sudo apt install ipset ipvsadm
+}
+
+config_ipvs() {
+  echo "配置ipvsadm模块加载"
+  cat << EOF | sudo tee /etc/modules-load.d/ipvs.conf
+ip_vs
+ip_vs_rr
+ip_vs_wrr
+ip_vs_sh
+nf_conntrack
+EOF
+}
+
+load_ipvs_conf() {
+  echo "创建加载模块脚本文件"
+  cat << EOF | sudo tee ipvs.sh
+#!/bin/sh
+modprobe -- ip_vs
+modprobe -- ip_vs_rr
+modprobe -- ip_vs_wrr
+modprobe -- ip_vs_sh
+modprobe -- nf_conntrack
+EOF
+}
+
+comm_ipvs() {
+  echo "执行脚本文件，加载模块"
+  sudo cat ipvs.sh
+  sudo sh ipvs.sh
+  sudo lsmod | grep ip_vs
+}
+
 main () {
   "$trace" && set -x
   # 运行前清理
@@ -318,16 +374,24 @@ main () {
 
   # 设置时区
   set_timezone
-
-  set_hosts
-
-  #
-  set_dns
+#  set_hosts
+#  set_dns
 
   #disable_selinux
   disable_swap
   set_kernel_parameters
   set_file_limits
+  install_base_comm
+  set_time_zone
+  set_time
+  set_ufw
+
+  #ipvs
+  install_ipvs
+  config_ipvs
+  load_ipvs_conf
+
+
 
   cat /etc/security/limits.conf
   cat /etc/profile

@@ -9,6 +9,8 @@ declare github_proxy=false
 declare github_proxy_url=""
 declare install=false
 declare url=""
+declare sandbox_image_url="registry.k8s.io/pause:3.10"
+#declare sandbox_image_url="registry.cn-hangzhou.aliyuncs.com/google_containers/pause:3.10"
 
 while [[ $# -gt 0 ]]; do
   case $1 in
@@ -19,6 +21,9 @@ while [[ $# -gt 0 ]]; do
     --proxy_url=*)
       github_proxy_url="${1#*=}"
       ;;
+    --sandbox_image_url=*)
+          sandbox_image_url="${1#*=}"
+          ;;
     --install)
       install=true
       ;;
@@ -52,7 +57,7 @@ set_containerd_path() {
   # 配置文件默认在`/etc/containerd/config.toml` 这里仅修改两处配置
   # 替换为国内镜像, 国内服务器可以使用k8s.m.daocloud.io或者registry.cn-hangzhou.aliyuncs.com/google_containers/pause
   #sed -i 's#sandbox_image = .*#sandbox_image = "k8s.m.daocloud.io:3.9"#' "$CONTAINERD_CONFIG_FILE_PATH"
-  sed -i 's#sandbox_image = .*#sandbox_image = "registry.cn-hangzhou.aliyuncs.com/google_containers/pause:3.9"#' "$CONTAINERD_CONFIG_FILE_PATH"
+  sed -i 's#sandbox_image = .*#sandbox_image = "registry.cn-hangzhou.aliyuncs.com/google_containers/pause:3.10"#' "$CONTAINERD_CONFIG_FILE_PATH"
   grep -nE "sandbox_image" "$CONTAINERD_CONFIG_FILE_PATH"
 
   # 当 systemd 是选定的初始化系统时, 应当选择SystemdCgroup = true, 否则不需要修改

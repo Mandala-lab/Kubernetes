@@ -279,7 +279,7 @@ hash -r
 systemctl daemon-reload
 
 systemctl enable --now kubelet
-systemctl status kubelet
+#systemctl status kubelet
 
 systemctl restart containerd
 systemctl restart kubelet

@@ -15,6 +15,9 @@ chmod +x ./base/01-env/deb/03-allow-port.sh
 
 chmod +x ./base/02-cri/containerd/binarymode/01-install.sh
 #./base/02-cri/containerd/binarymode/01-install.sh --proxy=y --install=n --version="1.7.21"
+# 国内镜像
+./base/02-cri/containerd/binarymode/01-install.sh --proxy --install --version="1.7.21" --sandbox_image_url="registry.cn-hangzhou.aliyuncs.com/google_containers/pause:3.10"
+# 原版镜像
 ./base/02-cri/containerd/binarymode/01-install.sh --proxy --install --version="1.7.21"
 
 chmod +x ./base/02-cri/containerd/binarymode/02-config.sh
