@@ -7,7 +7,6 @@ set -e -o posix -o pipefail -x
 
 declare github_proxy=false
 declare github_proxy_url=""
-declare install=false
 declare url=""
 declare sandbox_image_url="registry.k8s.io/pause:3.10"
 #declare sandbox_image_url="registry.cn-hangzhou.aliyuncs.com/google_containers/pause:3.10"
@@ -22,11 +21,8 @@ while [[ $# -gt 0 ]]; do
       github_proxy_url="${1#*=}"
       ;;
     --sandbox_image_url=*)
-          sandbox_image_url="${1#*=}"
-          ;;
-    --install)
-      install=true
-      ;;
+      sandbox_image_url="${1#*=}"
+    ;;
     --url=*)
       url="${1#*=}"
       ;;
@@ -37,8 +33,7 @@ while [[ $# -gt 0 ]]; do
   esac
   shift
 done
-# 返回解析后的参数值
-echo "proxy:$github_proxy install:$install"
+
 
 set_containerd_path() {
   # 设置containerd.service的默认路径
@@ -56,8 +51,8 @@ set_containerd_path() {
   containerd config default | tee "$CONTAINERD_CONFIG_FILE_PATH"
   # 配置文件默认在`/etc/containerd/config.toml` 这里仅修改两处配置
   # 替换为国内镜像, 国内服务器可以使用k8s.m.daocloud.io或者registry.cn-hangzhou.aliyuncs.com/google_containers/pause
-  #sed -i 's#sandbox_image = .*#sandbox_image = "k8s.m.daocloud.io:3.9"#' "$CONTAINERD_CONFIG_FILE_PATH"
-  sed -i 's#sandbox_image = .*#sandbox_image = "registry.cn-hangzhou.aliyuncs.com/google_containers/pause:3.10"#' "$CONTAINERD_CONFIG_FILE_PATH"
+  #  sed -i 's#sandbox_image = .*#sandbox_image = "registry.cn-hangzhou.aliyuncs.com/google_containers/pause:3.10"#' "$CONTAINERD_CONFIG_FILE_PATH"
+  sed -i "s#sandbox_image = .*#sandbox_image = \"$sandbox_image_url\"#" "$CONTAINERD_CONFIG_FILE_PATH"
   grep -nE "sandbox_image" "$CONTAINERD_CONFIG_FILE_PATH"
 
   # 当 systemd 是选定的初始化系统时, 应当选择SystemdCgroup = true, 否则不需要修改
@@ -133,28 +128,10 @@ EOF
 # 所有节点均需安装与配置, 根据实际需求, 推荐Kubernetes安装v1.24版本以上使用containerd. 本教程只使用containerd
 # 创建/etc/modules-load.d/containerd.conf配置文件，确保在系统启动时自动加载所需的内核模块，以满足容器运行时的要求
 # 安装程序需要系统参数，这些参数会在重新启动时持续存在。
-set_containerd_config () {
-  cat <<EOF | sudo tee /etc/modules-load.d/containerd.conf
-overlay
-br_netfilter
-EOF
-
-  lsmod | grep br_netfilter
-
-  # 应用 sysctl 参数而无需重新启动
-  sudo sysctl --system
-
-  systemctl daemon-reload
-  systemctl enable --now containerd
-  systemctl restart containerd
-  #systemctl status containerd
-}
 
 verify() {
   # 校验配置文件
   grep -nE "sandbox_image|SystemdCgroup" "$CONTAINERD_CONFIG_FILE_PATH"
-
-  cat /etc/modules-load.d/containerd.conf
 
   ctr -v
   which containerd
@@ -164,7 +141,12 @@ main () {
   set_containerd_path
   set_url "$url"
   download_ctr_service "$url"
-  set_containerd_config
+
+  systemctl daemon-reload
+  systemctl enable --now containerd
+  systemctl restart containerd
+  #systemctl status containerd
+
   verify
 }
 

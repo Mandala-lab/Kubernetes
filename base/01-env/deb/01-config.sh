@@ -48,7 +48,7 @@ pre_clear(){
   rm -rf /etc/sysctl.d/99-kubernetes-cri.conf
 }
 
-# TODO
+# TODO 设置静态路由
 # Function: set_static_route
 # Description: 设置静态路由
 # Parameters:
@@ -103,14 +103,14 @@ EOF
   sudo netplan apply
 }
 
-# 设置时区
 set_timezone () {
-  # 设置上海时区
+  echo "设置时区"
+  echo "设置上海时区"
   sudo timedatectl status
   sudo timedatectl set-timezone Asia/Shanghai
 }
 
-# TODO
+# TODO set_hosts
 set_hosts () {
   if [[ -e /etc/hosts.back ]];then
     mv /etc/hosts{.back,}
@@ -118,17 +118,25 @@ set_hosts () {
 
   # 修改Hosts
   cp /etc/hosts{,.back}
-  cat >> /etc/hosts << EOF
-192.168.3.100 node-100
-192.168.3.101 node-101
-192.168.3.102 node-102
-192.168.3.103 node-103
+  cat > /etc/hosts << EOF
+127.0.1.1 localhost.localdomain VM-20-8-ubuntu
+127.0.0.1 localhost
+
+::1 ip6-localhost ip6-loopback
+fe00::0 ip6-localnet
+ff00::0 ip6-mcastprefix
+ff02::1 ip6-allnodes
+ff02::2 ip6-allrouters
+ff02::3 ip6-allhosts
+
 EOF
+cat /etc/hosts
 }
 
+# TODO set_dns
 set_dns () {
   # systemd-resolved
-  # 推荐配置. 会影响CoreDNS, 造成回环问题
+  echo "正在配置systemd-resolved. 错误的设置会影响CoreDNS, 造成回环问题"
   systemctl disable systemd-resolved
   systemctl stop systemd-resolved
   cp /etc/resolv.conf{,.back}
@@ -141,9 +149,11 @@ EOF
 }
 
 disable_selinux() {
-  echo 关闭SELinux
+  echo "关闭SELinux"
   sudo setenforce 0 # 临时禁用, 重启变回
-  sudo sed -i 's/^SELINUX=enforcing$/SELINUX=permissive/' /etc/selinux/config # 禁用
+  if [[ -d /etc/selinux && -e /etc/selinux/config  ]]; then
+    sudo sed -i 's/^SELINUX=enforcing$/SELINUX=permissive/' /etc/selinux/config # 禁用
+  fi
 }
 
 disable_swap () {
@@ -177,8 +187,8 @@ disable_swap () {
 # net.bridge.bridge-nf-call-ip6tables : 启用控制 IPv6 数据包经过桥接时是否要经过 ip6tables 过滤
 # net.ipv4.ip_forward                 : 启用 IPv4 数据包的转发功能
 
-# 系统优化
 set_kernel_parameters () {
+  echo "正在设置推荐的内核参数"
   cat > /etc/sysctl.d/99-kubernetes-better.conf <<EOF
 net.bridge.bridge-nf-call-iptables        = 1
 net.bridge.bridge-nf-call-ip6tables       = 1
@@ -194,6 +204,12 @@ net.ipv6.conf.all.disable_ipv6            = 1
 net.netfilter.nf_conntrack_max            = 25000000
 EOF
 
+  mkdir -p /etc/modules-load.d
+  cat << EOF | sudo tee /etc/modules-load.d/k8s.conf
+overlay
+br_netfilter
+EOF
+
   modprobe br_netfilter
   lsmod | grep br_netfilter
   # Overlay网络通过在物理网络（即underlay网络）之上构建一个虚拟网络层来实现这一点。
@@ -203,68 +219,14 @@ EOF
   modprobe -- nf_conntrack
   lsmod | grep nf_conntrack
 
-  mkdir -p /etc/sysconfig/modules
-  cat > /etc/sysconfig/modules/kubernetes.module <<EOF
-modprobe br_netfilter
-#modprobe overlay
-modprobe -- nf_conntrack
-EOF
-  chmod 755 /etc/sysconfig/modules/kubernetes.module
-
-  # 系统优化
-  #cat <<EOF | sudo tee /etc/sysctl.d/99-kubernetes-cri.conf
-#net.bridge.bridge-nf-call-iptables        = 1
-#net.bridge.bridge-nf-call-ip6tables       = 1
-#net.ipv4.ip_forward                       = 1
-#net.ipv4.tcp_slow_start_after_idle        = 0
-#net.core.rmem_max                         = 16777216
-#kernel.softlockup_all_cpu_backtrace       = 1
-#kernel.softlockup_panic                   = 1
-#fs.file-max                               = 2097152
-#fs.nr_open                                = 2097152
-#fs.inotify.max_user_instances             = 8192
-#fs.inotify.max_user_watches               = 524288
-#fs.inotify.max_queued_events              = 16384
-#vm.max_map_count                          = 262144
-#net.core.netdev_max_backlog               = 16384
-#net.ipv4.tcp_wmem                         = 4096 12582912 16777216
-#net.core.wmem_max                         = 16777216
-#net.core.somaxconn                        = 32768
-#net.ipv4.tcp_timestamps                   = 0
-#net.ipv4.tcp_max_syn_backlog              = 8096
-#net.bridge.bridge-nf-call-arptables       = 1
-#net.ipv4.tcp_rmem                         = 4096 12582912 16777216
-#vm.swappiness                             = 0
-#kernel.sysrq                              = 1
-#net.ipv4.neigh.default.gc_stale_time      = 120
-#net.ipv4.conf.all.rp_filter               = 0
-#net.ipv4.conf.default.rp_filter           = 0
-#net.ipv4.conf.default.arp_announce        = 2
-#net.ipv4.conf.lo.arp_announce             = 2
-#net.ipv4.conf.all.arp_announce            = 2
-#net.ipv4.tcp_max_tw_buckets               = 5000
-#net.ipv4.tcp_syncookies                   = 1
-#net.ipv4.tcp_synack_retries               = 2
-## net.ipv6.conf.lo.disable_ipv6            = 1
-#net.ipv6.conf.all.disable_ipv6           = 1
-## net.ipv6.conf.default.disable_ipv6       = 1
-#net.ipv4.ip_local_port_range              = 1024 65535
-#net.ipv4.tcp_keepalive_time               = 600
-#net.ipv4.tcp_keepalive_probes             = 10
-#net.ipv4.tcp_keepalive_intvl              = 30
-#net.nf_conntrack_max                      = 25000000
-#net.netfilter.nf_conntrack_max            = 25000000
-#net.netfilter.nf_conntrack_tcp_timeout_established = 180
-#net.netfilter.nf_conntrack_tcp_timeout_time_wait   = 120
-#net.netfilter.nf_conntrack_tcp_timeout_close_wait  = 60
-#net.netfilter.nf_conntrack_tcp_timeout_fin_wait    = 12
-#EOF
+  echo "通过运行以下指令确认 net.bridge.bridge-nf-call-iptables、net.bridge.bridge-nf-call-ip6tables 和 net.ipv4.ip_forward 系统变量在你的 sysctl 配置中被设置为 1"
+  sudo sysctl net.bridge.bridge-nf-call-iptables net.bridge.bridge-nf-call-ip6tables net.ipv4.ip_forward vm.swappiness vm.overcommit_memory vm.panic_on_oom fs.inotify.max_user_instances fs.inotify.max_user_watches fs.file-max fs.nr_open net.ipv6.conf.all.disable_ipv6 net.netfilter.nf_conntrack_max
 
   sysctl --system
 }
 
-# 文件限制
 set_file_limits () {
+  echo "设置文件限制"
   if [ -f /etc/security/limits.conf ];then
     cp /etc/security/limits.conf{,.back}
   fi
@@ -303,11 +265,6 @@ EOF
 
   source /etc/profile
   cat /etc/profile
-
-}
-
-install_base_comm() {
-   sudo apt update && sudo apt install -y apt-transport-https ca-certificates curl gpg
 }
 
 set_time_zone() {
@@ -322,44 +279,17 @@ set_time() {
   sudo ntpdate time1.aliyun.com
 }
 
+# TODO: 改为更安全的方式
 set_ufw() {
+  echo "不安全的方式, 正在关闭防火墙"
   sudo ufw disable
   sudo ufw status
 }
 
-install_ipvs() {
-  echo "下载IPVS"
-  sudo apt install ipset ipvsadm
-}
-
-config_ipvs() {
-  echo "配置ipvsadm模块加载"
-  cat << EOF | sudo tee /etc/modules-load.d/ipvs.conf
-ip_vs
-ip_vs_rr
-ip_vs_wrr
-ip_vs_sh
-nf_conntrack
-EOF
-}
-
-load_ipvs_conf() {
-  echo "创建加载模块脚本文件"
-  cat << EOF | sudo tee ipvs.sh
-#!/bin/sh
-modprobe -- ip_vs
-modprobe -- ip_vs_rr
-modprobe -- ip_vs_wrr
-modprobe -- ip_vs_sh
-modprobe -- nf_conntrack
-EOF
-}
-
-comm_ipvs() {
-  echo "执行脚本文件，加载模块"
-  sudo cat ipvs.sh
-  sudo sh ipvs.sh
-  sudo lsmod | grep ip_vs
+install_base_comm() {
+  echo "正在下载基础的软件包"
+  sudo apt update
+  sudo apt install -y apt-transport-https ca-certificates curl gpg
 }
 
 main () {
@@ -381,17 +311,10 @@ main () {
   disable_swap
   set_kernel_parameters
   set_file_limits
-  install_base_comm
   set_time_zone
   set_time
   set_ufw
-
-  #ipvs
-  install_ipvs
-  config_ipvs
-  load_ipvs_conf
-
-
+  install_base_comm
 
   cat /etc/security/limits.conf
   cat /etc/profile
