@@ -17,7 +17,7 @@ while [[ $# -gt 0 ]]; do
       github_proxy=true
       github_proxy_url="https://mirror.ghproxy.com/"
       ;;
-    --proxy_url=*)
+    --github_proxy_url=*)
       github_proxy_url="${1#*=}"
       ;;
     --install)

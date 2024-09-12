@@ -23,7 +23,7 @@ set_kubernetes_port() {
 
 install_containerd() {
   # TODO: 切换成apt安装的ctr
-  ehco "安装containerd"
+  echo "安装containerd"
   # --proxy: 使用国内github代理
   # --github_proxy_url: 如果使用了--proxy 国内的github的代理, 请填写此项, 否则请删除该项或者填值位空字符串
   # --install: 覆盖安装, 无论是否已经安装了containerd
@@ -34,7 +34,7 @@ install_containerd() {
   # 不使用任何代理, 适用于可以直接访问github的服务器
   ./base/02-cri/containerd/binarymode/01-install.sh --github_proxy_url="" --install --version="1.7.21"
   # 使用国内github代理
-  ./base/02-cri/containerd/binarymode/01-install.sh --proxy --github_proxy_url="https://mirror.ghproxy.com/" --install --version="1.7.21"
+  #./base/02-cri/containerd/binarymode/01-install.sh --proxy --github_proxy_url="https://mirror.ghproxy.com/" --install --version="1.7.21"
 }
 
 config_containerd() {
