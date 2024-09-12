@@ -31,10 +31,8 @@ install_containerd() {
   chmod +x ./base/02-cri/containerd/binarymode/01-install.sh
   # 下载前检查containerd是否已经存在于环境变量, 如果存在则不下载
   #./base/02-cri/containerd/binarymode/01-install.sh --proxy --install=n --version="1.7.21"
-  # 不使用任何代理, 适用于可以直接访问github的服务器
-  ./base/02-cri/containerd/binarymode/01-install.sh --github_proxy_url="" --install --version="1.7.21"
   # 使用国内github代理
-  #./base/02-cri/containerd/binarymode/01-install.sh --proxy --github_proxy_url="https://mirror.ghproxy.com/" --install --version="1.7.21"
+  ./base/02-cri/containerd/binarymode/01-install.sh --proxy --github_proxy_url="https://mirror.ghproxy.com/" --install --version="1.7.21"
 }
 
 config_containerd() {
@@ -43,8 +41,14 @@ config_containerd() {
   # --github_proxy_url: 如果使用了--proxy 国内的github的代理, 请填写此项, 否则请删除该项或者填值位空字符串
   # --sandbox_image_url: k8s组件的镜像url, 默认值为 registry.k8s.io/pause:3.10
   chmod +x ./base/02-cri/containerd/binarymode/02-config.sh
-  # 原版镜像
-  ./base/02-cri/containerd/binarymode/02-config.sh
+  # 国内镜像
+  ./base/02-cri/containerd/binarymode/02-config.sh --sandbox_image_url="registry.cn-hangzhou.aliyuncs.com/google_containers/pause:3.10"
+}
+
+config_containerd_proxy() {
+  echo "设置containerd的代理仓库"
+  chmod +x ./base/02-cri/containerd/binarymode/03-repo.sh
+  ./base/02-cri/containerd/binarymode/03-repo.sh --http_proxy="http://192.168.3.220:7890" --https_proxy="http://192.168.3.220:7890"
 }
 
 install_crictl() {
@@ -58,8 +62,8 @@ install_crictl() {
 }
 
 install_kubernetes_components() {
-  chmod +x ./base/03-components/02-comm/deb/01-install-kubernetes-components.sh
-  ./base/03-components/02-comm/deb/01-install-kubernetes-components.sh
+  chmod +x ./base/03-components/02-comm/deb/01-install-control-plane-components.sh
+  ./base/03-components/02-comm/deb/01-install-control-plane-components.sh
 }
 
 main() {
@@ -68,6 +72,7 @@ main() {
   set_kubernetes_port
   install_containerd
   config_containerd
+  config_containerd_proxy
   install_crictl
   install_kubernetes_components
 }
