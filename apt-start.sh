@@ -47,6 +47,12 @@ config_containerd() {
   ./base/02-cri/containerd/binarymode/02-config.sh
 }
 
+install_runc() {
+  echo "安装runc"
+  chmod +x ./base/02-cri/containerd/apt/03-install-runc.sh
+  ./base/02-cri/containerd/apt/03-install-runc.sh
+}
+
 install_crictl() {
   echo "安装crictl"
   echo "如果需要手动上传, 那么请上传二进制文件到/tmp, 文件名为: crictl-${CRICTL_VERSION}-linux-${ARCH}.tar.gz"
@@ -68,6 +74,7 @@ main() {
   set_kubernetes_port
   install_containerd
   config_containerd
+  install_runc
   install_crictl
   install_kubernetes_components
 }
