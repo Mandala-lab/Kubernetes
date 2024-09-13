@@ -278,9 +278,26 @@ set_time() {
 
 # TODO: 改为更安全的方式
 set_ufw() {
-  echo "不安全的方式, 正在关闭防火墙"
-  sudo ufw disable
-  sudo ufw status
+  # 检查 ufw 命令是否存在
+  if command -v ufw &> /dev/null; then
+      echo "不安全的方式, 正在关闭防火墙"
+      sudo ufw disable
+      sudo ufw status
+  else
+      echo "ufw 未安装，正在安装..."
+      sudo apt update
+      sudo apt install -y ufw
+      echo "ufw 安装完成"
+
+      # 检查安装是否成功
+      if command -v ufw &> /dev/null; then
+          echo "不安全的方式, 正在关闭防火墙"
+          sudo ufw disable
+          sudo ufw status
+      else
+          echo "ufw 安装失败"
+      fi
+  fi
 }
 
 install_base_comm() {

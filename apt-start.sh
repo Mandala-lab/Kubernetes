@@ -53,6 +53,12 @@ install_runc() {
   ./base/02-cri/containerd/apt/03-install-runc.sh
 }
 
+install_socat() {
+  echo "安装socat"
+  chmod +x ./base/03-components/03-socat/deb/install.sh
+  ./base/03-components/03-socat/deb/install.sh
+}
+
 install_crictl() {
   echo "安装crictl"
   echo "如果需要手动上传, 那么请上传二进制文件到/tmp, 文件名为: crictl-${CRICTL_VERSION}-linux-${ARCH}.tar.gz"
@@ -61,11 +67,17 @@ install_crictl() {
   chmod +x ./base/03-components/01-crictl/01-install.sh
   #./base/03-components/01-crictl/01-install.sh --proxy=y --install --version="v1.31.1"
   ./base/03-components/01-crictl/01-install.sh --install --version="v1.31.1"
+
+  chmod +x ./base/03-components/01-crictl/02-config.sh
+  ./base/03-components/01-crictl/02-config.sh
 }
 
 install_kubernetes_components() {
   chmod +x ./base/03-components/02-comm/deb/01-install-kubernetes-components.sh
   ./base/03-components/02-comm/deb/01-install-kubernetes-components.sh
+
+  chmod +x ./base/03-components/02-comm/deb/02-config.sh
+  ./base/03-components/02-comm/deb/02-config.sh
 }
 
 main() {
@@ -73,9 +85,9 @@ main() {
   set_ipvs
   set_kubernetes_port
   install_containerd
-  config_containerd
   install_runc
   install_crictl
+  config_containerd
   install_kubernetes_components
 }
 

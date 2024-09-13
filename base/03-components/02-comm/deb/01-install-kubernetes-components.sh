@@ -10,9 +10,9 @@ while [[ $# -gt 0 ]]; do
       kubernetes_version="${1#*=}"
       ;;
     *)
-      echo "未知的命令行选项参数: $1"
-      exit 1
-      ;;
+    echo "未知的命令行选项参数: $1"
+    exit 1
+    ;;
   esac
   shift
 done

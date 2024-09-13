@@ -2,12 +2,12 @@
 # 启用 POSIX 模式并设置严格的错误处理机制
 set -e -o posix -o pipefail
 
-MASTER_HOST_IP="159.75.231.54"
+MASTER_HOST_IP="192.168.3.100"
 MASTER_HOST_PORT=6443
 CONTROL_PLANE_ENDPOINT=$MASTER_HOST_IP:$MASTER_HOST_PORT
 MASTER_NODE_NAME="node1"
-CERT_SA_NS=(192.168.3.101 node1)
-KUBERNETES_VERSION="1.30.1"
+CERT_SA_NS=(192.168.3.100 node1)
+KUBERNETES_VERSION="1.31.1"
 IMAGE_REPOSITORY="registry.aliyuncs.com/google_containers"
 POD_SUBNET="10.244.0.0/24"
 SERVICE_SUBNET="10.96.0.0/16"
@@ -28,7 +28,7 @@ cat > kubeadm-init-conf.yaml <<EOF
 apiVersion: kubeadm.k8s.io/v1beta3
 kind: InitConfiguration
 bootstrapTokens:
-  - groups:certSANs
+  - groups:
       # 指定用于节点引导的安全组
       - system:bootstrappers:kubeadm:default-node-token
     token: "9a08jv.c0izixklcxtmnze7"

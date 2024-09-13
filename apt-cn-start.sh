@@ -21,6 +21,31 @@ set_kubernetes_port() {
   ./base/01-env/deb/03-allow-port.sh
 }
 
+install_runc() {
+  echo "安装runc"
+  chmod +x ./base/02-cri/containerd/apt/03-install-runc.sh
+  ./base/02-cri/containerd/apt/03-install-runc.sh
+}
+
+install_socat() {
+  echo "安装socat"
+  chmod +x ./base/03-components/03-socat/deb/install.sh
+  ./base/03-components/03-socat/deb/install.sh
+}
+
+install_crictl() {
+  echo "安装crictl"
+  echo "如果需要手动上传, 那么请上传二进制文件到/tmp, 文件名为: crictl-${CRICTL_VERSION}-linux-${ARCH}.tar.gz"
+  # CRICTL_VERSION: 版本, 例如v1.30.0
+  # ARCH: 架构, 例如, amd64
+  chmod +x ./base/03-components/01-crictl/01-install.sh
+  #./base/03-components/01-crictl/01-install.sh --proxy=y --install --version="v1.31.1"
+  ./base/03-components/01-crictl/01-install.sh --install --version="v1.31.1"
+  
+  chmod +x ./base/03-components/01-crictl/02-config.sh
+  ./base/03-components/01-crictl/02-config.sh
+}
+
 install_containerd() {
   # TODO: 切换成apt安装的ctr
   echo "安装containerd"
@@ -47,23 +72,16 @@ config_containerd() {
 
 config_containerd_proxy() {
   echo "设置containerd的代理仓库"
-  chmod +x ./base/02-cri/containerd/binarymode/03-repo.sh
-  ./base/02-cri/containerd/binarymode/03-repo.sh --http_proxy="http://192.168.3.220:7890" --https_proxy="http://192.168.3.220:7890"
-}
-
-install_crictl() {
-  echo "安装crictl"
-  echo "如果需要手动上传, 那么请上传二进制文件到/tmp, 文件名为: crictl-${CRICTL_VERSION}-linux-${ARCH}.tar.gz"
-  # CRICTL_VERSION: 版本, 例如v1.30.0
-  # ARCH: 架构, 例如, amd64
-  chmod +x ./base/03-components/01-crictl/01-install.sh
-  #./base/03-components/01-crictl/01-install.sh --proxy=y --install --version="v1.31.1"
-  ./base/03-components/01-crictl/01-install.sh --install --version="v1.31.1"
+  chmod +x ./base/02-cri/containerd/binarymode/03-repo-proxy.sh
+  ./base/02-cri/containerd/binarymode/03-repo-proxy.sh --http_proxy="http://192.168.3.220:7890" --https_proxy="http://192.168.3.220:7890"
 }
 
 install_kubernetes_components() {
-  chmod +x ./base/03-components/02-comm/deb/01-install-control-plane-components.sh
-  ./base/03-components/02-comm/deb/01-install-control-plane-components.sh
+  chmod +x ./base/03-components/02-comm/deb/cn/01-install.sh
+  ./base/03-components/02-comm/deb/cn/01-install.sh
+
+  chmod +x ./base/03-components/02-comm/deb/02-config.sh
+  ./base/03-components/02-comm/deb/02-config.sh
 }
 
 main() {
@@ -72,8 +90,8 @@ main() {
   set_kubernetes_port
   install_containerd
   config_containerd
-  config_containerd_proxy
   install_crictl
+  config_containerd_proxy
   install_kubernetes_components
 }
 
