@@ -17,15 +17,7 @@ while [ "$#" -gt 0 ]; do
     esac
 done
 
-if grep swap /etc/fstab; then
-  echo "swap没有关闭, 建议关闭"
-  exit 1
-fi
 
-if sudo blkid | grep swap; then
-  echo "swap没有关闭, 建议关闭"
-  exit 1
-fi
 
 # 运行前清理
 pre_clear(){
@@ -168,6 +160,11 @@ disable_swap () {
 
   # 检查是否存在swap分区
   if sudo blkid | grep swap -eq 0; then
+    echo "swap没有关闭, 请关闭"
+    exit 1
+  fi
+
+  if sudo blkid | grep swap; then
     echo "swap没有关闭, 建议关闭"
     exit 1
   fi
