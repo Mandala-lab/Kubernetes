@@ -10,7 +10,7 @@ cat /etc/security/limits.conf
 echo "正在检测文件: /etc/security/limits.d/20-nproc.conf"
 cat /etc/security/limits.d/20-nproc.conf
 
-echo "正在检测文件: /etc/profile"
+echo "正在检测文件: /etc/profile"w
 cat /etc/profile
 
 echo "正在检测文件: /etc/sysconfig/modules/k8s.modules"

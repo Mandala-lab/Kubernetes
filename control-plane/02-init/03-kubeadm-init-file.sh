@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# kubeadm配置文件 https://kubernetes.io/zh-cn/docs/reference/config-api
+
 # 启用 POSIX 模式并设置严格的错误处理机制
 set -e -o posix -o pipefail
 
@@ -9,6 +11,11 @@ set -e -o posix -o pipefail
 mkdir -p /etc/kubernetes/manifests
 HOME="/home/kubernetes"
 cd $HOME || exit
+
+# 验证配置文件是否合法
+kubeadm config validate --config kubeadm-init-conf.yaml
+
+# init预检
 if kubeadm init phase preflight --dry-run --config kubeadm-init-conf.yaml; then
   echo "预检成功"
   # 安装

@@ -23,4 +23,7 @@ echo 'alias k=kubectl' >>~/.bashrc
 echo 'complete -o default -F __start_kubectl k' >>~/.bashrc
 source ~/.bashrc
 
+# 由于集群节点通常按顺序初始化，因此 CoreDNS Pod 很可能都运行在第一个控制平面节点上。
+# 为了提供更高的可用性，请在至少加入一个新节点后重新平衡 CoreDNS Pod:
 
+kubectl rollout restart deployment coredns -n kube-system
