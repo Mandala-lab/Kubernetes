@@ -35,7 +35,7 @@ rm -rf /usr/bin/cilium
 
 # 清理 CNI 配置
 rm -rf /etc/cni/net.d/
-rm -rf /opt/cni/bin/
+#rm -rf /opt/cni/bin/
 rm -rf /etc/sysctl.d/00-k8s-arp.conf
 rm -rf /etc/sysctl.d/98-cilium.conf
 
