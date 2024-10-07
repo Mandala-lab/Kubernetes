@@ -274,6 +274,7 @@ set_time() {
   echo "使用ntpdate命令同步时间"
   sudo apt install ntpdate
   sudo ntpdate time1.aliyun.com
+
 }
 
 # TODO: 改为更安全的方式
