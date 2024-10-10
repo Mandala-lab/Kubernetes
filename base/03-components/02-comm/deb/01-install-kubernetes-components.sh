@@ -27,6 +27,7 @@ check_dir() {
 
 add_kubernetes_apt() {
   echo "添加 Kubernetes apt 仓库。 请注意，此仓库仅包含适用于 Kubernetes 1.31 的软件包； 对于其他 Kubernetes 次要版本，则需要更改 URL 中的 Kubernetes 次要版本以匹配你所需的次要版本 （你还应该检查正在阅读的安装文档是否为你计划安装的 Kubernetes 版本的文档）"
+  mkdir -pv /etc/apt/keyrings/
   curl -fsSL https://pkgs.k8s.io/core:/stable:/"${kubernetes_version}"/deb/Release.key | sudo gpg --dearmor -o /etc/apt/keyrings/kubernetes-apt-keyring.gpg
   echo "deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/${kubernetes_version}/deb/ /" | sudo tee /etc/apt/sources.list.d/kubernetes.list
   cat /etc/apt/sources.list.d/kubernetes.list
