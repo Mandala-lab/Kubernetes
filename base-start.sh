@@ -36,7 +36,7 @@ chmod +x ./base/02-cri/containerd/binarymode/02-config.sh
 # 原版镜像
 ./base/02-cri/containerd/binarymode/02-config.sh
 # 国内镜像
-./base/02-cri/containerd/binarymode/02-config.sh --sandbox_image_url="registry.cn-hangzhou.aliyuncs.com/google_containers/pause:3.10"
+#./base/02-cri/containerd/binarymode/02-config.sh --sandbox_image_url="registry.cn-hangzhou.aliyuncs.com/google_containers/pause:3.10"
 
 # 安装runc
 # --proxy 可选值: y, n
@@ -57,8 +57,8 @@ chmod +x ./base/03-components/03-socat/deb/install.sh
 
 # 全部节点安装kubernetes组件
 # --kubernetes_version: kubernetes仓库版本, 默认v1.31, 也可以是 v1.30, v1.28
-chmod +x .base/03-components/02-comm/deb/01-install-kubernetes-components.sh
-.base/03-components/02-comm/deb/01-install-kubernetes-components.sh --kubernetes_version="v1.31"
+chmod +x ./base/03-components/02-comm/deb/01-install-kubernetes-components.sh
+./base/03-components/02-comm/deb/01-install-kubernetes-components.sh --kubernetes_version="v1.31"
 
 # 控制平面安装kubectl组件
 chmod +x .control-plane/01-kubectl/apt/01-install-control-plane-components.sh
