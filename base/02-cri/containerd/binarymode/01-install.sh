@@ -40,7 +40,7 @@ done
 echo "proxy:$github_proxy install:$install version:$version"
 
 pre_clear () {
-  unset "$CONTAINERD_HOME"
+#  unset "$CONTAINERD_HOME"
 
   # 设置containerd.service的默认路径
   if [ -z "${CONTAINERD_SERVICE}" ]; then
