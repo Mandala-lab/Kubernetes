@@ -30,11 +30,11 @@ install_containerd() {
   # --version: containerd的版本, 从 https://github.com/containerd/containerd/releases 查找版本
   chmod +x ./base/02-cri/containerd/binarymode/01-install.sh
   # 下载前检查containerd是否已经存在于环境变量, 如果存在则不下载
-  #./base/02-cri/containerd/binarymode/01-install.sh --proxy --install=n --version="1.7.21"
+  #./base/02-cri/containerd/binarymode/01-install.sh --proxy --install=n --version="2.0.1"
   # 不使用任何代理, 适用于可以直接访问github的服务器
-  ./base/02-cri/containerd/binarymode/01-install.sh --github_proxy_url="" --install --version="1.7.21"
+  ./base/02-cri/containerd/binarymode/01-install.sh --github_proxy_url="" --install --version="2.0.1"
   # 使用国内github代理
-  #./base/02-cri/containerd/binarymode/01-install.sh --proxy --github_proxy_url="https://mirror.ghproxy.com/" --install --version="1.7.21"
+  #./base/02-cri/containerd/binarymode/01-install.sh --proxy --github_proxy_url="https://mirror.ghproxy.com/" --install --version="2.0.1"
 }
 
 config_containerd() {
@@ -65,8 +65,8 @@ install_crictl() {
   # CRICTL_VERSION: 版本, 例如v1.30.0
   # ARCH: 架构, 例如, amd64
   chmod +x ./base/03-components/01-crictl/01-install.sh
-  #./base/03-components/01-crictl/01-install.sh --proxy=y --install --version="v1.31.1"
-  ./base/03-components/01-crictl/01-install.sh --install --version="v1.31.1"
+  #./base/03-components/01-crictl/01-install.sh --proxy=y --install --version="v1.32.0"
+  ./base/03-components/01-crictl/01-install.sh --install --version="v1.32.0"
 
   chmod +x ./base/03-components/01-crictl/02-config.sh
   ./base/03-components/01-crictl/02-config.sh
@@ -74,7 +74,7 @@ install_crictl() {
 
 install_kubernetes_components() {
   chmod +x ./base/03-components/02-comm/deb/01-install-kubernetes-components.sh
-  ./base/03-components/02-comm/deb/01-install-kubernetes-components.sh
+  ./base/03-components/02-comm/deb/01-install-kubernetes-components.sh --kubernetes_version="v1.32"
 
   chmod +x ./base/03-components/02-comm/deb/02-config.sh
   ./base/03-components/02-comm/deb/02-config.sh

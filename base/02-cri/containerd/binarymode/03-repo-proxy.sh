@@ -212,7 +212,7 @@ verify () {
     echo "目录生成成功"
   fi
 
-  echo containerd test
+  echo "containerd test"
   ctr --debug  i pull \
     registry.k8s.io/prometheus-adapter/prometheus-adapter:v0.11.2
   crictl pull registry.k8s.io/prometheus-adapter/prometheus-adapter:v0.11.2

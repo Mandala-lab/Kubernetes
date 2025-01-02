@@ -8,6 +8,7 @@ set -e -o posix -o pipefail
 #--ignore-preflight-errors=all \
 mkdir -p /etc/kubernetes/manifests
 HOME="/home/kubernetes"
+mkdir -pv ${HOME}
 cd $HOME || exit
 
 VERSION=1.31.1

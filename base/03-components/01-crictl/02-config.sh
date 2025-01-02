@@ -12,7 +12,7 @@ EOF
 }
 
 set_crictl_conf_v2() {
-  ls ls /var/run/containerd/
+  ls /var/run/containerd/
   crictl config runtime-endpoint unix:///var/run/containerd/containerd.sock
 }
 

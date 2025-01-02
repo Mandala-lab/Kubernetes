@@ -6,7 +6,7 @@ declare KUBERNETES_VERSION="v1.31"
 
 set_kubernetes_deb_key() {
   sudo curl -fsSL https://mirrors.aliyun.com/kubernetes-new/core/stable/${KUBERNETES_VERSION}/deb/Release.key |
-      sudo gpg --dearmor -o /etc/apt/keyrings/kubernetes-apt-keyring.gpg
+  sudo gpg --dearmor -o /etc/apt/keyrings/kubernetes-apt-keyring.gpg
 }
 
 set_kubernetes_apt_repo() {

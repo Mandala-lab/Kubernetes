@@ -1,5 +1,5 @@
 #!/bin/bash
-
+apt install net-tools
 cilium uninstall cilium -n kube-system
 rm -rf /etc/cni/net.d/05-cilium.conflist
 rm -rf /opt/cni/bin/cilium-cni
@@ -9,6 +9,10 @@ ifconfig cilium_host down
 ip link delete cilium_host
 ifconfig cilium_vxlan down
 ip link delete cilium_vxlan
+ifconfig kube-ipvs0 down
+ip link delete kube-ipvs0
+ifconfig lxc_health@if23 down
+ip link delete lxc_health@if23
 
 # 删除crd
 sudo kubectl get crd | grep cilium | awk '{print $1}' | xargs sudo kubectl delete crd
@@ -30,14 +34,20 @@ iptables -t mangle -Z
 sudo ipvsadm -C
 
 # remove cilium
-rm -rf /usr/local/bin/cilium
-rm -rf /usr/bin/cilium
+#rm -rf /usr/local/bin/cilium
+#rm -rf /usr/bin/cilium
+
+# 配置文件
+rm -rf /etc/cni/net.d/*
 
 # 清理 CNI 配置
 rm -rf /etc/cni/net.d/
-#rm -rf /opt/cni/bin/
+rm -rf /opt/cni/bin/
 rm -rf /etc/sysctl.d/00-k8s-arp.conf
 rm -rf /etc/sysctl.d/98-cilium.conf
+
+# sock
+rm /var/run/cilium/cilium.sock
 
 # 清理网卡
 sudo ip link list | grep lxc | awk '{print $2}' | cut -c 1-15 | xargs -I {} sudo ip link delete {}
@@ -46,4 +56,4 @@ sudo ip link list | grep cilium_host@cilium_net | awk '{print $2}' | cut -c 1-11
 sudo ip route flush proto bird # 更新路由
 
 # bfp, 谨慎删除
-rm -rf /etc/systemd/system/sys-fs-bpf.mount
+#rm -rf /etc/systemd/system/sys-fs-bpf.mount

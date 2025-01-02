@@ -11,11 +11,11 @@ bootstrapTokens:
 #      - authentication # 用于身份验证
 localAPIEndpoint:
   # masterIP 主节点用于广播的地址
-  advertiseAddress: 192.168.3.160
+  advertiseAddress: 192.168.3.100
   # Kubernetes API 服务器监听的端口
   bindPort: 6443
 nodeRegistration:
-  name: "node-160" # 该控制节点的名称, 也就是出现在kubectl get no的名称
+  name: "192.168.3.100" # 该控制节点的名称, 也就是出现在kubectl get no的名称
   # CRI（容器运行时接口）的通信 socket 用来读取容器运行时的信息。 此信息会被以注解的方式添加到 Node API 对象至上，用于后续用途。
   criSocket: unix:///var/run/containerd/containerd.sock
   # 镜像拉取策略。 这两个字段的值必须是 "Always"、"Never" 或 "IfNotPresent" 之一。 默认值是 "IfNotPresent"，也是添加此字段之前的默认行为
@@ -33,15 +33,11 @@ apiServer:
   certSANs:
     # 集群中各个节点的 IP 地址、域名、负载均衡、或者集群的公共访问地址作为 certSANs 字段的值
     - 192.168.3.100
-    - 192.168.3.152
-    - 192.168.3.155
-    - 192.168.3.158
-    - 192.168.3.160
-    - "node-100"
-    - "node-152"
-    - "node-155"
-    - "node-158"
-    - "node-160"
+    - 192.168.3.101
+    - 192.168.3.102
+    - "node1"
+    - "node2"
+    - "node3"
   extraArgs:
     # API 服务器的授权模式
     authorization-mode: Node,RBAC
@@ -56,15 +52,15 @@ apiServer:
 apiVersion: kubeadm.k8s.io/v1beta3
 kind: ClusterConfiguration
 # 版本信息
-kubernetesVersion: 1.30.1
+kubernetesVersion: 1.31.1
 # 证书目录路径
 certificatesDir: /etc/kubernetes/pki
 # 集群名称。
 clusterName: kubernetes
 # 控制器管理器配置
-controllerManager: { }
+# controllerManager: { }
 # DNS 配置
-dns: { }
+# dns: { }
 # etcd 数据库的配置。例如使用这个部分可以定制本地 etcd 或者配置 API 服务器 使用一个外部的 etcd 集群。
 etcd:
   local:
@@ -96,7 +92,7 @@ etcd:
 # 在一个包含不止一个控制面实例的集群中，该字段应该设置为放置在控制面 实例之前的外部负载均衡器的地址。
 # 在带有强制性节点回收的环境中，controlPlaneEndpoint 可以用来 为控制面设置一个稳定的 DNS。
 # 负载均衡地址或者master的主机
-controlPlaneEndpoint: "192.168.3.160:6443"
+controlPlaneEndpoint: "192.168.3.100:6443"
 # 其中包含集群的网络拓扑配置。使用这一部分可以定制 Pod 的 子网或者 Service 的子网。
 networking:
   # Kubernetes 服务所使用的的 DNS 域名。 默认值为 "cluster.local"。
@@ -110,7 +106,7 @@ networking:
   # 10.10.66.0/20的范围是从10.10.64.0到10.10.79.255，共有4096个IP地址
   serviceSubnet: "10.10.0.0/20"
 # 调度器配置
-scheduler: { }
+# scheduler: { }
 ---
 apiVersion: kubelet.config.k8s.io/v1beta1
 kind: KubeletConfiguration
