@@ -57,12 +57,12 @@ chmod +x ./base/03-components/03-socat/deb/install.sh
 
 # 全部节点安装kubernetes组件
 # --kubernetes_version: kubernetes仓库版本, 默认v1.31, 也可以是 v1.30, v1.28
-chmod +x .base/03-components/02-comm/deb/01-install-kubernetes-components.sh
-.base/03-components/02-comm/deb/01-install-kubernetes-components.sh --kubernetes_version="v1.31"
+chmod +x ./base/03-components/02-comm/deb/01-install-kubernetes-components.sh
+./base/03-components/02-comm/deb/01-install-kubernetes-components.sh --kubernetes_version="v1.31"
 
 # 控制平面安装kubectl组件
-chmod +x .control-plane/01-kubectl/apt/01-install-control-plane-components.sh
-.control-plane/01-kubectl/apt/01-install-control-plane-components.sh
+chmod +x ./control-plane/01-kubectl/apt/01-install-control-plane-components.sh
+./control-plane/01-kubectl/apt/01-install-control-plane-components.sh
 
 # 控制平面安装crictl组件,用于调试
 # 如果需要手动上传, 那么请上传二进制文件到/tmp, 文件名为: crictl-${CRICTL_VERSION}-linux-${ARCH}.tar.gz
