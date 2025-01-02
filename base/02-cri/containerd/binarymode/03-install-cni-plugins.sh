@@ -3,7 +3,7 @@
 set -e -o posix -o pipefail
 
 # TODO 切换为动态获取
-VERSION="v1.4.0"
+VERSION="v1.6.1"
 
 ARCH=""
 # 使用uname -m获取架构信息
@@ -27,4 +27,3 @@ mkdir -p /opt/cni/bin
 tar Cxzvf /opt/cni/bin cni-plugins-linux-${ARCH}-${VERSION}.tgz
 
 set +x
-

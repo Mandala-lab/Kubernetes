@@ -51,9 +51,9 @@ set_containerd_path() {
   containerd config default | tee "$CONTAINERD_CONFIG_FILE_PATH"
   # 配置文件默认在`/etc/containerd/config.toml` 这里仅修改两处配置
   # 替换为国内镜像, 国内服务器可以使用k8s.m.daocloud.io或者registry.cn-hangzhou.aliyuncs.com/google_containers/pause
-  #  sed -i 's#sandbox_image = .*#sandbox_image = "registry.cn-hangzhou.aliyuncs.com/google_containers/pause:3.10"#' "$CONTAINERD_CONFIG_FILE_PATH"
-  sed -i "s#sandbox_image = .*#sandbox_image = \"$sandbox_image_url\"#" "$CONTAINERD_CONFIG_FILE_PATH"
-  grep -nE "sandbox_image" "$CONTAINERD_CONFIG_FILE_PATH"
+  #  sed -i 's#sandbox = .*#sandbox = "registry.cn-hangzhou.aliyuncs.com/google_containers/pause:3.10"#' "$CONTAINERD_CONFIG_FILE_PATH"
+  sed -i "s#sandbox = .*#sandbox = \"$sandbox_image_url\"#" "$CONTAINERD_CONFIG_FILE_PATH"
+  grep -nE "sandbox" "$CONTAINERD_CONFIG_FILE_PATH"
 
   # 当 systemd 是选定的初始化系统时, 应当选择SystemdCgroup = true, 否则不需要修改
   # 要在runc中使用 systemd的cgroup 驱动程序，请将 /etc/containerd/config.toml修改SystemdCgroup为true
@@ -131,7 +131,7 @@ EOF
 
 verify() {
   # 校验配置文件
-  grep -nE "sandbox_image|SystemdCgroup" "$CONTAINERD_CONFIG_FILE_PATH"
+  grep -nE "sandbox|SystemdCgroup" "$CONTAINERD_CONFIG_FILE_PATH"
 
   ctr -v
   which containerd

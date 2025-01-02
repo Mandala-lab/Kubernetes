@@ -1,4 +1,4 @@
-apiVersion: kubeadm.k8s.io/v1beta3
+apiVersion: kubeadm.k8s.io/v1beta4
 bootstrapTokens:
   - groups:
       - system:bootstrappers:kubeadm:default-node-token
@@ -9,99 +9,66 @@ bootstrapTokens:
       - authentication
 kind: InitConfiguration
 localAPIEndpoint:
-  advertiseAddress: 1.2.3.4
+  # 优先使用内网IP, 如果不知道,请注释该advertiseAddress参数,k8s会自动获取
+  advertiseAddress: 10.0.1.2
   bindPort: 6443
 nodeRegistration:
   criSocket: unix:///var/run/containerd/containerd.sock
   imagePullPolicy: IfNotPresent
-  name: node
+  imagePullSerial: true
+  # 如果初始化失败, 尝试注释name
+  #name: node1
   taints: null
+timeouts:
+  controlPlaneComponentHealthCheck: 4m0s
+  discovery: 5m0s
+  etcdAPICall: 2m0s
+  kubeletHealthCheck: 4m0s
+  kubernetesAPICall: 1m0s
+  tlsBootstrap: 5m0s
+  upgradeManifests: 5m0s
 ---
 apiServer:
-  timeoutForControlPlane: 4m0s
-apiVersion: kubeadm.k8s.io/v1beta3
+  certSANs:
+    - 45.207.192.132
+    - 45.207.192.133
+    - 45.207.192.134
+    - 45.207.192.135
+    - 45.207.192.136
+    - 45.207.195.158
+    - 10.0.1.2
+    - 10.0.1.3
+    - 10.0.1.4
+    - 10.0.1.5
+    - 10.0.1.6
+    - 10.0.1.7
+    - node1
+    - node2
+    - node3
+    - node4
+    - node5
+    - node6
+    - node7
+apiVersion: kubeadm.k8s.io/v1beta4
+caCertificateValidityPeriod: 87600h0m0s
+certificateValidityPeriod: 8760h0m0s
 certificatesDir: /etc/kubernetes/pki
 clusterName: kubernetes
-controllerManager: { }
-dns: { }
+controllerManager: {}
+dns: {}
+encryptionAlgorithm: RSA-2048
 etcd:
   local:
     dataDir: /var/lib/etcd
 imageRepository: registry.k8s.io
 kind: ClusterConfiguration
-kubernetesVersion: 1.30.0
+kubernetesVersion: 1.32.0
 networking:
   dnsDomain: cluster.local
   serviceSubnet: 10.96.0.0/12
-scheduler: { }
----
-apiVersion: kubeproxy.config.k8s.io/v1alpha1
-bindAddress: 0.0.0.0
-bindAddressHardFail: false
-clientConnection:
-  acceptContentTypes: ""
-  burst: 0
-  contentType: ""
-  kubeconfig: /var/lib/kube-proxy/kubeconfig.conf
-  qps: 0
-clusterCIDR: ""
-configSyncPeriod: 0s
-conntrack:
-  maxPerCore: null
-  min: null
-  tcpBeLiberal: false
-  tcpCloseWaitTimeout: null
-  tcpEstablishedTimeout: null
-  udpStreamTimeout: 0s
-  udpTimeout: 0s
-detectLocal:
-  bridgeInterface: ""
-  interfaceNamePrefix: ""
-detectLocalMode: ""
-enableProfiling: false
-healthzBindAddress: ""
-hostnameOverride: ""
-iptables:
-  localhostNodePorts: null
-  masqueradeAll: false
-  masqueradeBit: null
-  minSyncPeriod: 0s
-  syncPeriod: 0s
-ipvs:
-  excludeCIDRs: null
-  minSyncPeriod: 0s
-  scheduler: ""
-  strictARP: false
-  syncPeriod: 0s
-  tcpFinTimeout: 0s
-  tcpTimeout: 0s
-  udpTimeout: 0s
-kind: KubeProxyConfiguration
-logging:
-  flushFrequency: 0
-  options:
-    json:
-      infoBufferSize: "0"
-    text:
-      infoBufferSize: "0"
-  verbosity: 0
-metricsBindAddress: ""
-mode: ""
-nftables:
-  masqueradeAll: false
-  masqueradeBit: null
-  minSyncPeriod: 0s
-  syncPeriod: 0s
-nodePortAddresses: null
-oomScoreAdj: null
-portRange: ""
-showHiddenMetricsForVersion: ""
-winkernel:
-  enableDSR: false
-  forwardHealthCheckVip: false
-  networkName: ""
-  rootHnsEndpointName: ""
-  sourceVip: ""
+  podSubnet: 10.244.0.0/16
+proxy: {}
+scheduler: {}
 ---
 apiVersion: kubelet.config.k8s.io/v1beta1
 authentication:
@@ -123,6 +90,7 @@ clusterDNS:
 clusterDomain: cluster.local
 containerRuntimeEndpoint: ""
 cpuManagerReconcilePeriod: 0s
+crashLoopBackOff: {}
 evictionPressureTransitionPeriod: 0s
 fileCheckFrequency: 0s
 healthzBindAddress: 127.0.0.1
@@ -139,10 +107,9 @@ logging:
     text:
       infoBufferSize: "0"
   verbosity: 0
-memorySwap: { }
+memorySwap: {}
 nodeStatusReportFrequency: 0s
 nodeStatusUpdateFrequency: 0s
-resolvConf: /run/systemd/resolve/resolv.conf
 rotateCertificates: true
 runtimeRequestTimeout: 0s
 shutdownGracePeriod: 0s

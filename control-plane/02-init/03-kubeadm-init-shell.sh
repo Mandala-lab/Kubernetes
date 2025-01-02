@@ -10,16 +10,18 @@ mkdir -p /etc/kubernetes/manifests
 HOME="/home/kubernetes"
 cd $HOME || exit
 
+# 镜像源
+# --image-repository=registry.aliyuncs.com/google_containers \
 kubeadm init \
---kubernetes-version=1.30.2 \
---control-plane-endpoint="192.168.3.100" \
---apiserver-bind-port="6443" \
---image-repository=registry.aliyuncs.com/google_containers \
---service-cidr=10.96.0.0/12 \
---pod-network-cidr=10.244.0.0/16 \
---cri-socket=unix:///var/run/containerd/containerd.sock \
---upload-certs \
- --v=7
+  --kubernetes-version=1.32.0 \
+  --control-plane-endpoint="192.168.3.100" \
+  --apiserver-bind-port="6443" \
+  --service-cidr=10.96.0.0/12 \
+  --pod-network-cidr=10.244.0.0/16 \
+  --cri-socket=unix:///var/run/containerd/containerd.sock \
+  --upload-certs \
+  --skip-phases=addon/kube-proxy \
+  --v=7
 
 # 重新生成token
 # kubeadm token create --print-join-command
