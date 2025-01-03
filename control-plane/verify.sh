@@ -23,7 +23,8 @@ echo "正在检测文件: $CONTAINERD_CONFIG_FILE_PATH"
 if [ -z "${CONTAINERD_CONFIG_FILE_PATH}" ]; then
   export CONTAINERD_CONFIG_FILE_PATH="/etc/containerd/config.toml"
 fi
-grep -nE "sandbox_image|SystemdCgroup" "$CONTAINERD_CONFIG_FILE_PATH"
+# 新版ctr默认配置没有SystemdCgroup选项
+grep -nE "sandbox|SystemdCgroup" "$CONTAINERD_CONFIG_FILE_PATH"
 cat -n $CONTAINERD_CONFIG_FILE_PATH | grep -A 1 "\[plugins\.\"io\.containerd\.grpc\.v1\.cri\"\.registry\]"
 
 lsmod | grep br_netfilter

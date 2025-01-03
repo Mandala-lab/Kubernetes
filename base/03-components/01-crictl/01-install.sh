@@ -6,7 +6,7 @@ rm -rf /etc/crictl.yaml
 declare github_proxy=false
 declare github_proxy_url=""
 declare install=false
-declare version="v1.30.0"
+declare version="v1.32.0"
 declare url=""
 declare SAVED_DIR="/tmp"
 declare DOWNLOAD_DIR="/usr/local/bin"
@@ -87,7 +87,8 @@ download () {
 }
 
 install_crictl () {
-  sudo mkdir -p "$DOWNLOAD_DIR"
+  sudo mkdir -p "$SAVED_DIR"
+  cd "$SAVED_DIR" || exit
 
   # 无论是否存在, 都重新下载安装
   if [[ "$install" == true ]]; then

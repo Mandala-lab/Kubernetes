@@ -1,1 +1,0 @@
-kubectl top node

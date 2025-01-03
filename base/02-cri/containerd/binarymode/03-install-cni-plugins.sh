@@ -24,6 +24,6 @@ curl -Lfm 300 -O https://github.com/containernetworking/plugins/releases/downloa
 sha256sum -c cni-plugins-linux-${ARCH}-${VERSION}.tgz.sha256
 
 mkdir -p /opt/cni/bin
-tar Cxzvf /opt/cni/bin cni-plugins-linux-${ARCH}-${VERSION}.tgz
+tar -xzvf cni-plugins-linux-${ARCH}-${VERSION}.tgz -C /opt/cni/bin
 
 set +x

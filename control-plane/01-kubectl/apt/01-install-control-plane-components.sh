@@ -14,8 +14,6 @@ lock_kubernetes_version() {
 }
 
 main() {
-  check_dir
-  add_kubernetes_apt
   update_apt
   lock_kubernetes_version
 
