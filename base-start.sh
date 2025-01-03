@@ -51,6 +51,10 @@ chmod +x ./base/03-components/04-runc/install-runc.sh
 #./base/02-cri/containerd/binarymode/03-install-runc.sh --proxy=y --install
 ./base/03-components/04-runc/install-runc.sh --install --version="v1.2.3"
 
+# CNI二进制文件
+chmod +x ./base/02-cri/containerd/binarymode/03-install-cni-plugins.sh
+./base/02-cri/containerd/binarymode/03-install-cni-plugins.sh --version="v1.6.1"
+
 chmod +x ./base/03-components/03-socat/deb/install.sh
 ./base/03-components/03-socat/deb/install.sh
 

@@ -59,7 +59,8 @@ set_containerd_path() {
   # 要在runc中使用 systemd的cgroup 驱动程序，请将 /etc/containerd/config.toml修改SystemdCgroup为true
   # 如果使用 cgroup v2，建议使用 systemd的cgroup 驱动程序
   # 参考: https://kubernetes.io/zh-cn/docs/setup/production-environment/container-runtimes/#containerd-systemd
-  sed -i 's#SystemdCgroup = false#SystemdCgroup = true#g' "$CONTAINERD_CONFIG_FILE_PATH"
+  # 2.x版本以上已删除, 旧版本使用: sed -i 's#SystemdCgroup = false#SystemdCgroup = true#g' "$CONTAINERD_CONFIG_FILE_PATH"
+  sed -i "/ShimCgroup = ''/a \            SystemdCgroup = true" "$CONTAINERD_CONFIG_FILE_PATH"
 
   # 下载containerd.service
   # 配置containerd的service单元文件

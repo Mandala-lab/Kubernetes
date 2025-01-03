@@ -30,12 +30,6 @@ timeouts:
 ---
 apiServer:
   certSANs:
-    - 45.207.192.132
-    - 45.207.192.133
-    - 45.207.192.134
-    - 45.207.192.135
-    - 45.207.192.136
-    - 45.207.195.158
     - 10.0.1.2
     - 10.0.1.3
     - 10.0.1.4
@@ -49,6 +43,7 @@ apiServer:
     - node5
     - node6
     - node7
+    - node15
 apiVersion: kubeadm.k8s.io/v1beta4
 caCertificateValidityPeriod: 87600h0m0s
 certificateValidityPeriod: 8760h0m0s
@@ -65,7 +60,10 @@ kind: ClusterConfiguration
 kubernetesVersion: 1.32.0
 networking:
   dnsDomain: cluster.local
-  serviceSubnet: 10.96.0.0/12
-  podSubnet: 10.244.0.0/16
-proxy: {}
-scheduler: {}
+  serviceSubnet: 192.168.0.0/16
+  podSubnet: 172.0.0.0/16
+---
+apiVersion: kubeproxy.config.k8s.io/v1alpha1
+kind: KubeProxyConfiguration
+# kube-proxy specific options here
+mode: ipvs
