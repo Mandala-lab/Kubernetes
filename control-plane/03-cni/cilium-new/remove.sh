@@ -10,7 +10,7 @@ ifconfig cilium_host down
 ip link delete cilium_host
 ifconfig cilium_vxlan down
 ip link delete cilium_vxlan
-
+kubeadm reset -f
 # 删除crd
 sudo kubectl get crd | grep cilium | awk '{print $1}' | xargs sudo kubectl delete crd
 
@@ -36,7 +36,7 @@ rm -rf /usr/bin/cilium
 
 # 清理 CNI 配置
 rm -rf /etc/cni/net.d/
-rm -rf /opt/cni/bin/
+#rm -rf /opt/cni/bin/
 rm -rf /etc/sysctl.d/00-k8s-arp.conf
 rm -rf /etc/sysctl.d/98-cilium.conf
 
@@ -48,3 +48,4 @@ sudo ip route flush proto bird # 更新路由
 
 # bfp, 谨慎删除
 #rm -rf /etc/systemd/system/sys-fs-bpf.mount
+k8SRequireIpv4PodCidr

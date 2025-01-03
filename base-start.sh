@@ -24,7 +24,8 @@ chmod +x ./base/02-cri/containerd/binarymode/01-install.sh
 # 下载前检查containerd是否已经存在于环境变量, 如果存在则不下载
 #./base/02-cri/containerd/binarymode/01-install.sh --proxy --install=n --version="2.0.1"
 # 不使用任何代理, 适用于可以直接访问github的服务器
-./base/02-cri/containerd/binarymode/01-install.sh --github_proxy_url="" --install --version="2.0.1"
+#./base/02-cri/containerd/binarymode/01-install.sh --github_proxy_url="" --install --version="2.0.1"
+./base/02-cri/containerd/binarymode/01-install.sh --github_proxy_url="" --install --version="1.7.24"
 # 使用国内github代理
 #./base/02-cri/containerd/binarymode/01-install.sh --proxy --github_proxy_url="https://mirror.ghproxy.com/" --install --version="2.0.1"
 
