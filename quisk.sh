@@ -43,6 +43,3 @@ you need to add the following to config:
 45.207.195.158 node6
 EOF
 
-
-
-    server: https://45.207.192.132:6443

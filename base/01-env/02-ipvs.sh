@@ -66,7 +66,7 @@ EOF
 main () {
   pre_clear
   install_pack
-
+  load_param
   cat /etc/sysconfig/modules/ipvs.modules
 
   # 使用命令查看是否已经正确加载所需的内核模块:

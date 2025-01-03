@@ -4,7 +4,7 @@ set -o posix errexit -o pipefail
 
 k8sServiceHost="192.168.3.100"
 k8sServicePort=6443
-podCIDR="10.244.0.0/16"
+podCIDR="172.0.0.0/16"
 devices="eth0"
 cilium install cilium cilium/cilium --namespace kube-system \
    --set nodeinit.enabled=true \
@@ -50,9 +50,8 @@ cilium install cilium cilium/cilium --namespace kube-system \
 	 --set devices=$devices \
 	 --set l2podAnnouncements.interface=$devices \
 	 --set operator.rollOutPods=true \
-	 --set authentication.enabled=false \
-	 --set k8sServiceHost=$k8sServiceHost \
-	 --set k8sServicePort=$k8sServicePort
+	 --set authentication.enabled=false
+
 
 k8sServiceHost="192.168.3.100"
 k8sServicePort=6443
