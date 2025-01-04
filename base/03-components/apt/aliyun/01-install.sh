@@ -86,7 +86,7 @@ add_kubernetes_apt() {
 update_apt() {
   echo "更新 apt 索引"
   sudo apt-get update
-  sudo apt-get install -y kubelet="${selected_version}-00" kubeadm="${selected_version}-00" kubectl="${selected_version}-00"
+  sudo apt-get install -y kubelet kubeadm= kubectl
 }
 
 lock_kubernetes_version() {
