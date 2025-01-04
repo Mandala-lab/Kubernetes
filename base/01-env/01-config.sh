@@ -4,10 +4,15 @@
 
 set -e -o posix -o pipefail -x
 
+declare resolve_dns=1.1.1.1
 while [ "$#" -gt 0 ]; do
     case "$1" in
         --trace=*)
             trace=true
+            shift
+            ;;
+        --resolve_dns=*)
+            resolve_dns="${1#*=}"
             shift
             ;;
         *)  # 处理未知选项
@@ -16,8 +21,6 @@ while [ "$#" -gt 0 ]; do
             ;;
     esac
 done
-
-
 
 # 运行前清理
 pre_clear(){
@@ -135,7 +138,7 @@ set_dns () {
   rm -rf /etc/systemd/resolved.conf
   rm -rf /etc/resolv.conf
   cat > /etc/resolv.conf <<EOF
-nameserver 114.114.114.114
+nameserver $resolve_dns
 EOF
 #systemctl status systemd-resolved
 }
@@ -213,8 +216,8 @@ EOF
   # 它允许Kubernetes创建一个逻辑网络，其中的Pods可以通过一个统一的网络平面进行通信，而不需要关心底层的物理网络配置
   #modprobe overlay
 
-  modprobe -- nf_conntrack
-  lsmod | grep nf_conntrack
+  modprobe overlay
+  lsmod | grep br_netfilter
 
   echo "通过运行以下指令确认 net.bridge.bridge-nf-call-iptables、net.bridge.bridge-nf-call-ip6tables 和 net.ipv4.ip_forward 系统变量在你的 sysctl 配置中被设置为 1"
   sudo sysctl net.bridge.bridge-nf-call-iptables net.bridge.bridge-nf-call-ip6tables net.ipv4.ip_forward vm.swappiness vm.overcommit_memory vm.panic_on_oom fs.inotify.max_user_instances fs.inotify.max_user_watches fs.file-max fs.nr_open net.ipv6.conf.all.disable_ipv6 net.netfilter.nf_conntrack_max
@@ -300,35 +303,31 @@ set_ufw() {
   fi
 }
 
-install_base_comm() {
-  echo "正在下载基础的软件包"
-  sudo apt update
-  sudo apt install -y apt-transport-https ca-certificates curl gpg
-}
 
 main () {
   "$trace" && set -x
   # 运行前清理
   pre_clear
 
-  apt update -y
-
   # 验证每个节点的 MAC 地址和product_uuid是否唯一](https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/install-kubeadm/#verify-mac-address
   sudo cat /sys/class/dmi/id/product_uuid
 
+  # set_static_route
+
   # 设置时区
   set_timezone
-#  set_hosts
-#  set_dns
 
-  #disable_selinux
+  #  set_hosts
+
+  set_dns
+  disable_selinux
   disable_swap
   set_kernel_parameters
   set_file_limits
   set_time_zone
   set_time
   set_ufw
-  install_base_comm
+
 
   cat /etc/security/limits.conf
   cat /etc/profile

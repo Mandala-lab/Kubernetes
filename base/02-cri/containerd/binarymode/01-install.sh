@@ -8,7 +8,7 @@ set -e -o posix -o pipefail -x
 declare github_proxy=false
 declare github_proxy_url=""
 declare install=false
-declare version="1.7.21"
+declare version="1.7.24"
 declare url=""
 
 while [[ $# -gt 0 ]]; do

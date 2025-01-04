@@ -22,14 +22,17 @@ chmod +x ./base/01-env/tools/01-install-tools.sh
 ./base/01-env/tools/01-install-tools.sh
 
 # 安装runc
-# --proxy 添加参数则使用代理
+# --proxy 可选值: y, n
 # --version 必选值: 版本号
+# y: 使用国内的Github代理
+# n: 不使用国内的Github代理
 # --install 可选值: y, n
 # y: 当前系统是否安装, 都重新下载并安装
 # n: 如果当前系统存在, 那么跳过下载与安装
 chmod +x ./base/01-env/tools/02-install-runc.sh
 #./base/02-cri/containerd/binarymode/03-install-runc.sh --proxy=y --install
 ./base/01-env/tools/02-install-runc.sh \
+  --proxy \
   --install \
   --version="v1.2.3"
 
@@ -46,6 +49,8 @@ chmod +x ./base/02-cri/containerd/binarymode/01-install.sh
 # 下载前检查containerd是否已经存在于环境变量, 如果存在则不下载
 # 使用国内github代理
 ./base/02-cri/containerd/binarymode/01-install.sh \
+  --proxy \
+  --github_proxy_url="https://mirror.ghproxy.com/" \
   --install \
   --version="2.0.1"
 
@@ -55,7 +60,15 @@ chmod +x ./base/02-cri/containerd/binarymode/01-install.sh
 # --sandbox_image_url: k8s组件的镜像url, 默认值为 registry.k8s.io/pause:3.10
 chmod +x ./base/02-cri/containerd/binarymode/02-config.sh
 ./base/02-cri/containerd/binarymode/02-config.sh \
-  --proxy
+  --proxy \
+  --sandbox_image_url="registry.aliyuncs.com/google_containers/pause:3.10"
+
+# 配置拉取镜像的proxy URL
+chmod +x ./base/02-cri/containerd/binarymode/repo-proxy.sh
+./base/02-cri/containerd/binarymode/repo-proxy.sh \
+  --http_proxy="http://192.168.3.220:7890" \
+  --https_proxy="http://192.168.3.220:7890"
+
 # CNI二进制文件, 大多数的环境都需要, 但少数的CNI插件不需要
 chmod +x ./control-plane/03-cni/cni-plugins/01-install.sh
 ./control-plane/03-cni/cni-plugins/01-install.sh \

@@ -9,7 +9,6 @@ declare github_proxy=false
 declare github_proxy_url=""
 declare url=""
 declare sandbox_image_url="registry.k8s.io/pause:3.10"
-#declare sandbox_image_url="registry.cn-hangzhou.aliyuncs.com/google_containers/pause:3.10"
 
 while [[ $# -gt 0 ]]; do
   case $1 in
@@ -33,7 +32,6 @@ while [[ $# -gt 0 ]]; do
   esac
   shift
 done
-
 
 set_containerd_path() {
   # 设置containerd.service的默认路径
@@ -92,10 +90,24 @@ download_ctr_service () {
   if ! wget -t 2 -T 30 -N -S "$url"; then
     echo "下载containerd.service失败, 正在使用内置的文件进行替换, 但可能不是最新的, 可以进行手动替换"
     cat > "$CONTAINERD_SERVICE" << EOF
+# Copyright The containerd Authors.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
 [Unit]
 Description=containerd container runtime
 Documentation=https://containerd.io
-After=network.target local-fs.target
+After=network.target local-fs.target dbus.service
 
 [Service]
 ExecStartPre=-/sbin/modprobe overlay

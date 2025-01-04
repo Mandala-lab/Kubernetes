@@ -4,6 +4,15 @@ set -e -o posix -o pipefail
 
 systemctl daemon-reload
 
+echo "使用命令查看是否已经正确加载所需的内核模块:"
+lsmod | grep br_netfilter
+lsmod | grep overlay
+lsmod | grep -e ip_vs -e nf_conntrack
+cut -f1 -d " "  /proc/modules | grep -e ip_vs -e nf_conntrack
+
+echo "请查看系统时间是否与真实时间一致"
+date
+
 echo "正在检测文件: /etc/security/limits.conf"
 cat /etc/security/limits.conf
 
@@ -23,12 +32,12 @@ echo "正在检测文件: $CONTAINERD_CONFIG_FILE_PATH"
 if [ -z "${CONTAINERD_CONFIG_FILE_PATH}" ]; then
   export CONTAINERD_CONFIG_FILE_PATH="/etc/containerd/config.toml"
 fi
-# 新版ctr默认配置没有SystemdCgroup选项
+
 grep -nE "sandbox|SystemdCgroup" "$CONTAINERD_CONFIG_FILE_PATH"
 cat -n $CONTAINERD_CONFIG_FILE_PATH | grep -A 1 "\[plugins\.\"io\.containerd\.grpc\.v1\.cri\"\.registry\]"
 
-lsmod | grep br_netfilter
-lsmod | grep overlay
+echo "检查是否存在对应的仓库目录"
+ls  /etc/containerd/certs.d
 
 hash -r
 which kubeadm kubelet kubectl

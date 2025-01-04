@@ -2,20 +2,9 @@
 # 启用 POSIX 模式并设置严格的错误处理机制
 set -e -o posix -o pipefail
 
-declare kubernetes_version="v1.31"
-
-while [[ $# -gt 0 ]]; do
-  case $1 in
-    --kubernetes_version=*)
-      kubernetes_version="${1#*=}"
-      ;;
-    *)
-    echo "未知的命令行选项参数: $1"
-    exit 1
-    ;;
-  esac
-  shift
-done
+# 定义可用的版本列表
+kubernetes_version=("v1.32" "v1.31" "v1.30" "v1.29")
+current_selection=0  # 当前选中的索引
 
 check_dir() {
   echo "判断/etc/apt/keyrings命令是否存在"

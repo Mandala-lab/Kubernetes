@@ -1,5 +1,4 @@
 #!/bin/bash
-# TODO 待定, 此脚本暂不需要在Kubernetes执行
 set -e -o posix -o pipefail
 
 # TODO 切换为动态获取

@@ -2,6 +2,34 @@
 # 启用 POSIX 模式并设置严格的错误处理机制
 set -o posix -o pipefail -x
 
+# 定义确认函数
+confirm_execution() {
+    local timeout=5
+    local default="y"
+    local response
+
+    echo "是否继续执行？ (y/n，默认 $default，5秒后自动继续)"
+
+    # 使用 read -t 来设置超时时间
+    read -r -p "[y/N] " -t "$timeout" response
+
+    # 如果用户没有输入任何内容，默认选择 y
+    if [ -z "$response" ]; then
+        response="$default"
+    fi
+
+    # 将用户输入转换为小写
+    response=$(echo "$response" | tr '[:upper:]' '[:lower:]')
+
+    # 检查用户输入是否为 n
+    if [ "$response" = "n" ]; then
+        echo "用户选择不执行。退出脚本。"
+        exit 0
+    fi
+
+    echo "继续执行..."
+}
+
 while [ "$#" -gt 0 ]; do
     case "$1" in
         --trace=*)
@@ -37,9 +65,7 @@ install_pack () {
   apt install -y \
   conntrack \
   ipvsadm \
-  ipset \
-  wget \
-  git
+  ipset
 }
 
 # 加载内核参数
@@ -64,6 +90,9 @@ EOF
 }
 
 main () {
+  # 在执行主逻辑之前，调用 confirm_execution 函数进行确认
+  confirm_execution
+
   pre_clear
   install_pack
   load_param
