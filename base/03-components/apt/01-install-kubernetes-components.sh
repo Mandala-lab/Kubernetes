@@ -37,8 +37,6 @@ main() {
   add_kubernetes_apt
   update_apt
   lock_kubernetes_version
-
-  kubectl version --client
 }
 
 main "@"
