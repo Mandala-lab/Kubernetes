@@ -76,6 +76,8 @@ check_dir() {
 }
 
 add_kubernetes_apt() {
+  rm -rf /etc/apt/keyrings/kubernetes-apt-keyring.gpg
+  rm -rf /etc/apt/sources.list.d/kubernetes.list
   apt-get update && apt-get install -y apt-transport-https
   curl -fsSL https://mirrors.aliyun.com/kubernetes-new/core/stable/"${kubernetes_versions[$current_selection]}"/deb/Release.key |
       gpg --dearmor -o /etc/apt/keyrings/kubernetes-apt-keyring.gpg
@@ -86,12 +88,12 @@ add_kubernetes_apt() {
 update_apt() {
   echo "更新 apt 索引"
   sudo apt-get update
-  sudo apt-get install -y kubelet kubeadm= kubectl
+  sudo apt-get install -y kubelet kubeadm
 }
 
 lock_kubernetes_version() {
   echo "锁定版本，不随 apt upgrade 更新"
-  sudo apt-mark hold kubelet kubeadm kubectl
+  sudo apt-mark hold kubelet kubeadm
 }
 
 main() {
@@ -102,7 +104,8 @@ main() {
   lock_kubernetes_version
 
   echo "Kubernetes 安装完成，客户端版本如下："
-  kubectl version --client
+  kubeadm version
+  kubelet --version
 }
 
 # 调用 main 函数
