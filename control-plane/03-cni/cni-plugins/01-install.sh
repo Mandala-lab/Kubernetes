@@ -1,8 +1,31 @@
 #!/bin/bash
 set -e -o posix -o pipefail
 
-# TODO 切换为动态获取
-VERSION="v1.6.1"
+declare github_proxy=false
+declare github_proxy_url=""
+declare version="v1.6.1"
+
+while [[ $# -gt 0 ]]; do
+  case $1 in
+    --proxy)
+      github_proxy=true
+      github_proxy_url="https://mirror.ghproxy.com/"
+      ;;
+    --github_proxy_url=*)
+      github_proxy_url="${1#*=}"
+      ;;
+    --version=*)
+      version="${1#*=}"
+      ;;
+    *)
+      echo "未知的命令行选项参数: $1"
+      exit 1
+      ;;
+  esac
+  shift
+done
+# 返回解析后的参数值
+echo "proxy:$github_proxy install:$install version:$version"
 
 ARCH=""
 # 使用uname -m获取架构信息
@@ -17,12 +40,26 @@ else
 fi
 echo $ARCH
 
+if [[ -z $url ]];then
+ echo "set default url"
+ url="https://github.com/containernetworking/plugins/releases/download/${version}/cni-plugins-linux-${ARCH}-${version}.tgz{,.sha256}"
+fi
+
+echo "github_proxy_url: $github_proxy_url"
+echo "url: $url"
+
+if [[ -n "$github_proxy" && "$url" ]];then
+ echo "set proxy url"
+ url="${github_proxy_url}${url}"
+fi
+
 # 跟随重定向, 状态码为400就失败, 设置超时300秒, 使用远程文件的名称
-curl -Lfm 300 -O https://github.com/containernetworking/plugins/releases/download/${VERSION}/cni-plugins-linux-${ARCH}-${VERSION}.tgz{,.sha256}
+curl -Lfm 300 -O $url
+
 # 校验文件是否完整
-sha256sum -c cni-plugins-linux-${ARCH}-${VERSION}.tgz.sha256
+sha256sum -c cni-plugins-linux-${ARCH}-${version}.tgz.sha256
 
 mkdir -p /opt/cni/bin
-tar -xzvf cni-plugins-linux-${ARCH}-${VERSION}.tgz -C /opt/cni/bin
+tar -xzvf cni-plugins-linux-${ARCH}-${version}.tgz -C /opt/cni/bin
 
 set +x

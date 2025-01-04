@@ -72,6 +72,7 @@ chmod +x ./base/02-cri/containerd/binarymode/repo-proxy.sh
 # CNI二进制文件, 大多数的环境都需要, 但少数的CNI插件不需要
 chmod +x ./control-plane/03-cni/cni-plugins/01-install.sh
 ./control-plane/03-cni/cni-plugins/01-install.sh \
+  --proxy \
   --version="v1.6.1"
 
 # 全部节点安装kubernetes组件
