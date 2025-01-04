@@ -145,7 +145,12 @@ EOF
 
 disable_selinux() {
   echo "关闭SELinux"
-  sudo setenforce 0 # 临时禁用, 重启变回
+  if command -v setenforce >/dev/null 2>&1; then
+      echo "setenforce 命令存在，正在执行 setenforce 0 以临时禁用 SELinux"
+      sudo setenforce 0
+    else
+      echo "setenforce 命令不存在，跳过此步骤"
+  fi
   if [[ -d /etc/selinux && -e /etc/selinux/config  ]]; then
     sudo sed -i 's/^SELINUX=enforcing$/SELINUX=permissive/' /etc/selinux/config # 禁用
   fi
