@@ -6,8 +6,8 @@ set -e -o posix -o pipefail -x
 
 # TODO 默认关闭ufw防火墙
 # --resolve_dns: /etc/resolv.conf的DNS值
-chmod +x ./base/01-env/01-config.sh --resolve_dns=119.29.29.29
-./base/01-env/01-config.sh
+chmod +x ./base/01-env/01-config.sh
+./base/01-env/01-config.sh --resolve_dns=1.1.1.1
 
 # IPVS, 可选, 如果不需要IPVS,只需在执行时到该脚本时输入n即可
 chmod +x ./base/01-env/02-ipvs.sh
