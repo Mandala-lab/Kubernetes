@@ -204,12 +204,12 @@ disable_swap () {
 # net.ipv4.ip_forward                 : 启用 IPv4 数据包的转发功能
 
 set_kernel_parameters () {
-  modprobe br_netfilter
-  lsmod | grep br_netfilter
+
   # Overlay网络通过在物理网络（即underlay网络）之上构建一个虚拟网络层来实现这一点。
   # 它允许Kubernetes创建一个逻辑网络，其中的Pods可以通过一个统一的网络平面进行通信，而不需要关心底层的物理网络配置
-  #modprobe overlay
-
+  sudo modprobe nf_conntrack
+  sudo modprobe br_netfilter
+  sudo lsmod | grep br_netfilter
   modprobe overlay
   lsmod | grep br_netfilter
 
