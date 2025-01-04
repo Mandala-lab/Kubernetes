@@ -48,4 +48,3 @@ sudo ip route flush proto bird # 更新路由
 
 # bfp, 谨慎删除
 #rm -rf /etc/systemd/system/sys-fs-bpf.mount
-k8SRequireIpv4PodCidr

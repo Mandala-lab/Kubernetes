@@ -54,16 +54,16 @@ chmod +x ./base/02-cri/containerd/binarymode/01-install.sh
 # --github_proxy_url: 如果使用了--proxy github的代理, 可以添加该选项, 值为github的代理URL, 例如https://mirror.ghproxy.com/ 不要忽略/
 # --sandbox_image_url: k8s组件的镜像url, 默认值为 registry.k8s.io/pause:3.10
 chmod +x ./base/02-cri/containerd/binarymode/02-config.sh
-./base/02-cri/containerd/binarymode/02-config.sh \
-  --proxy
+./base/02-cri/containerd/binarymode/02-config.sh
+
 # CNI二进制文件, 大多数的环境都需要, 但少数的CNI插件不需要
 chmod +x ./control-plane/03-cni/cni-plugins/01-install.sh
 ./control-plane/03-cni/cni-plugins/01-install.sh \
   --version="v1.6.1"
 
 # 全部节点安装kubernetes组件
-chmod +x ./base/03-components/apt/aliyun/01-install.sh
-./base/03-components/apt/aliyun/01-install.sh
+chmod +x ./base/03-components/apt/01-install-kubernetes-components.sh
+./base/03-components/apt/01-install-kubernetes-components.sh
 
 # 控制平面安装kubectl组件
 chmod +x ./control-plane/01-kubectl/apt/01-install-control-plane-components.sh

@@ -105,6 +105,17 @@ set_timezone () {
   sudo timedatectl set-timezone Asia/Shanghai
 }
 
+#set_time() {
+#  echo "使用ntpdate命令同步时间"
+##  sudo apt install ntpdate
+##  sudo ntpdate time1.aliyun.com
+#
+#  echo "在安装 ntpd 之前，需要关闭 timesyncd，以防止这两个服务之间的相互冲突。"
+#  sudo timedatectl set-ntp no
+#  sudo apt update -y
+#  sudo apt install ntp -y
+#}
+
 # TODO set_hosts
 set_hosts () {
   if [[ -e /etc/hosts.back ]];then
@@ -193,28 +204,6 @@ disable_swap () {
 # net.ipv4.ip_forward                 : 启用 IPv4 数据包的转发功能
 
 set_kernel_parameters () {
-  echo "正在设置推荐的内核参数"
-  cat > /etc/sysctl.d/99-kubernetes-better.conf <<EOF
-net.bridge.bridge-nf-call-iptables        = 1
-net.bridge.bridge-nf-call-ip6tables       = 1
-net.ipv4.ip_forward                       = 1
-vm.swappiness                             = 0
-vm.overcommit_memory                      = 0
-vm.panic_on_oom                           = 0
-fs.inotify.max_user_instances             = 8192
-fs.inotify.max_user_watches               = 1048576
-fs.file-max                               = 52706963
-fs.nr_open                                = 52706963
-net.ipv6.conf.all.disable_ipv6            = 1
-net.netfilter.nf_conntrack_max            = 25000000
-EOF
-
-  mkdir -p /etc/modules-load.d
-  cat << EOF | sudo tee /etc/modules-load.d/k8s.conf
-overlay
-br_netfilter
-EOF
-
   modprobe br_netfilter
   lsmod | grep br_netfilter
   # Overlay网络通过在物理网络（即underlay网络）之上构建一个虚拟网络层来实现这一点。
@@ -245,6 +234,28 @@ set_file_limits () {
 *   hard    core    unlimited
 EOF
 
+  echo "正在设置推荐的内核参数"
+  cat > /etc/sysctl.d/99-kubernetes-better.conf <<EOF
+net.bridge.bridge-nf-call-iptables        = 1
+net.bridge.bridge-nf-call-ip6tables       = 1
+net.ipv4.ip_forward                       = 1
+vm.swappiness                             = 0
+vm.overcommit_memory                      = 0
+vm.panic_on_oom                           = 0
+fs.inotify.max_user_instances             = 8192
+fs.inotify.max_user_watches               = 1048576
+fs.file-max                               = 52706963
+fs.nr_open                                = 52706963
+net.ipv6.conf.all.disable_ipv6            = 1
+net.netfilter.nf_conntrack_max            = 25000000
+EOF
+
+  mkdir -p /etc/modules-load.d
+  cat << EOF | sudo tee /etc/modules-load.d/k8s.conf
+overlay
+br_netfilter
+EOF
+
   cat /etc/security/limits.conf
 
   if [[ -e /etc/security/limits.d/20-nproc.conf ]];then
@@ -272,17 +283,6 @@ EOF
   cat /etc/profile
 }
 
-set_time_zone() {
-  echo "设置时区"
-  date
-  timedatectl set-timezone Asia/Shanghai
-}
-
-set_time() {
-  echo "使用ntpdate命令同步时间"
-  sudo apt install ntpdate
-  sudo ntpdate time1.aliyun.com
-}
 
 # TODO: 改为更安全的方式
 set_ufw() {
@@ -329,10 +329,7 @@ main () {
   disable_swap
   set_kernel_parameters
   set_file_limits
-  set_time_zone
-  set_time
   set_ufw
-
 
   cat /etc/security/limits.conf
   cat /etc/profile

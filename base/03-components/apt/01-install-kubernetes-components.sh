@@ -24,12 +24,12 @@ add_kubernetes_apt() {
 update_apt() {
   echo "更新apt索引"
   sudo apt-get update
-  sudo apt-get install -y kubelet kubeadm kubectl
+  sudo apt-get install -y kubelet kubeadm
 }
 
 lock_kubernetes_version() {
   echo "锁定版本，不随 apt upgrade 更新"
-  sudo apt-mark hold kubelet kubeadm kubectl
+  sudo apt-mark hold kubelet kubeadm
 }
 
 main() {

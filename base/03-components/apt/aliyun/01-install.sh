@@ -81,7 +81,7 @@ add_kubernetes_apt() {
   apt-get update && apt-get install -y apt-transport-https
   curl -fsSL https://mirrors.aliyun.com/kubernetes-new/core/stable/"${kubernetes_versions[$current_selection]}"/deb/Release.key |
       gpg --dearmor -o /etc/apt/keyrings/kubernetes-apt-keyring.gpg
-  echo "deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://mirrors.aliyun.com/kubernetes-new/core/stable/"${kubernetes_versions[$current_selection]}"/deb/ /" |
+  echo "deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://mirrors.aliyun.com/kubernetes-new/core/stable/${kubernetes_versions[$current_selection]}/deb/ /" |
       tee /etc/apt/sources.list.d/kubernetes.list
 }
 

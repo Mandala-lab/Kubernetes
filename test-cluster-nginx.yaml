@@ -1,0 +1,41 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx-demo
+  
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: nginx-demo
+  template:
+    metadata:
+      labels:
+        app: nginx-demo
+      
+    spec:
+      containers:
+        # 镜像名称
+        - name: nginx
+          image: nginx:latest
+          ports:
+            - containerPort: 80
+          resources: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: nginx-service
+  # 命名空间，没有可以删除，默认是default
+  
+spec:
+  ports:
+    # 对外暴露的端口
+    - protocol: TCP
+      port: 80
+      targetPort: 80
+      nodePort: 30080
+  selector:
+    app: nginx-demo
+  # NodePort类型可以对外暴露端口
+  type: NodePort
