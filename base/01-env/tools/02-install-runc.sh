@@ -69,10 +69,16 @@ check_local() {
   fi
 }
 
-check_runc_version() {
+check_runc() {
+  # 使用 which 检查 runc 是否已安装
+  if ! which runc > /dev/null 2>&1; then
+    echo "runc 未安装，检查本地是否有新版进行安装..."
+    check_local
+    return  # 未安装时直接退出函数
+  fi
+
   # 获取 runc 的版本信息
   local_version=$(runc -v 2>&1 | grep -oP 'runc version \K[0-9]+\.[0-9]+\.[0-9]+')
-  version="1.2.4"
 
   # 检查是否成功获取版本号
   if [ -z "$local_version" ]; then
@@ -144,7 +150,7 @@ verify () {
 
 main () {
   set_arch
-  check_runc_version
+  check_runc
   set_url "$url"
   install_runc "$url" "$ARCH" "$version" "$install"
   verify
