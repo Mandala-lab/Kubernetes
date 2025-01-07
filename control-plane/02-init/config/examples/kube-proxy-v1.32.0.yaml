@@ -10,14 +10,14 @@ bootstrapTokens:
 kind: InitConfiguration
 localAPIEndpoint:
   # 优先使用内网IP, 如果不知道,请注释该advertiseAddress参数,k8s会自动获取
-  advertiseAddress: 192.168.3.100
+  advertiseAddress: 10.0.1.2
   bindPort: 6443
 nodeRegistration:
   criSocket: unix:///var/run/containerd/containerd.sock
   imagePullPolicy: IfNotPresent
   imagePullSerial: true
   # 如果初始化失败, 尝试注释name
-  name: node1
+  name: node5
   taints: null
 timeouts:
   controlPlaneComponentHealthCheck: 4m0s
@@ -27,17 +27,10 @@ timeouts:
   kubernetesAPICall: 1m0s
   tlsBootstrap: 5m0s
   upgradeManifests: 5m0s
-skipPhases:
-  - addon/kube-proxy
 ---
 apiServer:
   certSANs:
-    - 192.168.3.100
-    - 192.168.3.101
-    - 192.168.3.102
     - node1
-    - node2
-    - node3
 apiVersion: kubeadm.k8s.io/v1beta4
 caCertificateValidityPeriod: 87600h0m0s
 certificateValidityPeriod: 8760h0m0s
@@ -56,4 +49,8 @@ networking:
   dnsDomain: cluster.local
   serviceSubnet: 192.168.0.0/16
   podSubnet: 172.0.0.0/16
-  # podSubnet: 10.244.0.0/16
+---
+apiVersion: kubeproxy.config.k8s.io/v1alpha1
+kind: KubeProxyConfiguration
+# kube-proxy specific options here
+mode: ipvs

@@ -24,7 +24,7 @@ done
 
 # 运行前清理
 pre_clear(){
-  declare describe="运行前清理"
+  declare describe="运行前清理, 还原到被修改的文件前的配置"
   echo $describe
 
   if [ -f /etc/security/limits.conf.back ];then
@@ -281,6 +281,7 @@ EOF
 
   source /etc/profile
   cat /etc/profile
+  sysctl --system
 }
 
 
@@ -307,7 +308,6 @@ set_ufw() {
       fi
   fi
 }
-
 
 main () {
   "$trace" && set -x

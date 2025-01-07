@@ -68,3 +68,6 @@ chmod +x ./base/03-components/apt/01-install-kubernetes-components.sh
 # 控制平面安装kubectl组件
 chmod +x ./control-plane/01-kubectl/apt/01-install-control-plane-components.sh
 ./control-plane/01-kubectl/apt/01-install-control-plane-components.sh
+
+chmod +x ./verify.sh
+./verify.sh

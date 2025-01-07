@@ -16,17 +16,11 @@ date
 echo "正在检测文件: /etc/security/limits.conf"
 cat /etc/security/limits.conf
 
-echo "正在检测文件: /etc/security/limits.d/20-nproc.conf"
-cat /etc/security/limits.d/20-nproc.conf
+echo "正在检测文件: /etc/security/limits.d/20-nproc.conf, 该文件不存在属于正常范畴"
+cat /etc/security/limits.d/20-nproc.conf || true
 
 echo "正在检测文件: /etc/profile"
 cat /etc/profile
-
-echo "正在检测文件: /etc/sysconfig/modules/k8s.modules"
-cat /etc/sysconfig/modules/k8s.modules
-
-echo "正在检测文件: /etc/sysctl.d/99-kubernetes-cri.conf"
-cat /etc/sysctl.d/99-kubernetes-cri.conf
 
 echo "正在检测文件: $CONTAINERD_CONFIG_FILE_PATH"
 if [ -z "${CONTAINERD_CONFIG_FILE_PATH}" ]; then
@@ -36,8 +30,8 @@ fi
 grep -nE "sandbox|SystemdCgroup" "$CONTAINERD_CONFIG_FILE_PATH"
 cat -n $CONTAINERD_CONFIG_FILE_PATH | grep -A 1 "\[plugins\.\"io\.containerd\.grpc\.v1\.cri\"\.registry\]"
 
-echo "检查是否存在对应的仓库目录"
-ls  /etc/containerd/certs.d
+echo "检查是否存在对应的仓库目录, 不使用代理忽略即可"
+ls  /etc/containerd/certs.d || true
 
 hash -r
 which kubeadm kubelet kubectl

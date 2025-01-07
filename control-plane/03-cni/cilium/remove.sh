@@ -32,7 +32,7 @@ sudo ipvsadm -C
 
 # remove cilium
 #rm -rf /usr/local/bin/cilium
-rm -rf /usr/bin/cilium
+#rm -rf /usr/bin/cilium
 
 # 清理 CNI 配置
 rm -rf /etc/cni/net.d/

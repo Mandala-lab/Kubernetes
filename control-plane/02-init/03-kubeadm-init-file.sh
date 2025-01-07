@@ -21,7 +21,7 @@ if kubeadm init phase preflight --dry-run --config kubeadm.yaml; then
   mkdir -p $HOME/.kube
   sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
   sudo chown $(id -u):$(id -g) $HOME/.kube/config
+fi
 
 # 重新生成token
 # kubeadm token create --print-join-command
-fi

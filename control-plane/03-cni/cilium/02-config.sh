@@ -3,7 +3,7 @@
 set -o posix errexit -o pipefail
 
 # https://docs.cilium.io/en/v1.16/operations/performance/tuning/#netkit
-CONFIG_PREEMPT_NONE=y
+#CONFIG_PREEMPT_NONE=y
 
 # tuned network-* 配置文件
 apt install tuned -y
