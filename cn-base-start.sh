@@ -2,6 +2,9 @@
 # 启用 POSIX 模式并设置严格的错误处理机制
 set -e -o posix -o pipefail -x
 
+chmod +x ./rebase-config.sh
+./rebase-config.sh
+
 # 基础环境设置
 
 # TODO 默认关闭ufw防火墙
@@ -72,7 +75,7 @@ chmod +x ./base/02-cri/containerd/binarymode/repo-proxy.sh
 chmod +x ./control-plane/03-cni/cni-plugins/01-install.sh
 ./control-plane/03-cni/cni-plugins/01-install.sh \
   --proxy \
-  --version="v1.6.1"
+  --version="v1.6.2"
 
 # 全部节点安装kubernetes组件
 chmod +x ./base/03-components/apt/aliyun/01-install.sh

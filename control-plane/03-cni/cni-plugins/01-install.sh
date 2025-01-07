@@ -3,7 +3,7 @@ set -e -o posix -o pipefail
 
 declare github_proxy=false
 declare github_proxy_url=""
-declare version="v1.6.1"
+declare version="v1.6.2"
 
 while [[ $# -gt 0 ]]; do
   case $1 in
@@ -42,7 +42,8 @@ echo $ARCH
 
 if [[ -z $url ]];then
  echo "set default url"
- url="https://github.com/containernetworking/plugins/releases/download/${version}/cni-plugins-linux-${ARCH}-${version}.tgz{,.sha256}"
+ file_url="https://github.com/containernetworking/plugins/releases/download/${version}/cni-plugins-linux-${ARCH}-${version}.tgz"
+ sha256_url="https://github.com/containernetworking/plugins/releases/download/${version}/cni-plugins-linux-${ARCH}-${version}.tgz.sha256"
 fi
 
 echo "github_proxy_url: $github_proxy_url"
@@ -50,14 +51,18 @@ echo "url: $url"
 
 if [[ -n "$github_proxy" && "$url" ]];then
  echo "set proxy url"
- url="${github_proxy_url}${url}"
+ url="${github_proxy_url}${file_url}"
+ sha256_url="${github_proxy_url}${sha256_url}"
 fi
 
 # 跟随重定向, 状态码为400就失败, 设置超时300秒, 使用远程文件的名称
-curl -Lfm 300 -O $url
+echo "file_url: ${file_url}"
+echo "sha256_url: ${sha256_url}"
+wget "${file_url}"
+wget "${sha256_url}"
 
 # 校验文件是否完整
-sha256sum -c cni-plugins-linux-${ARCH}-${version}.tgz.sha256
+sha256sum -c cni-plugins-linux-${ARCH}-${version}.tgz{,.sha256}
 
 mkdir -p /opt/cni/bin
 tar -xzvf cni-plugins-linux-${ARCH}-${version}.tgz -C /opt/cni/bin

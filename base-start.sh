@@ -2,6 +2,9 @@
 # 启用 POSIX 模式并设置严格的错误处理机制
 set -e -o posix -o pipefail -x
 
+chmod +x ./rebase-config.sh
+./rebase-config.sh
+
 # 基础环境设置
 
 # TODO 默认关闭ufw防火墙
