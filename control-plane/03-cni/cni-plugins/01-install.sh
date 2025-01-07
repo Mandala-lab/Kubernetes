@@ -58,7 +58,11 @@ fi
 # 跟随重定向, 状态码为400就失败, 设置超时300秒, 使用远程文件的名称
 echo "file_url: ${file_url}"
 echo "sha256_url: ${sha256_url}"
-wget "${file_url}"
+
+rm -rf cni-plugins-linux-${ARCH}-${version}.tgz
+rm -rf cni-plugins-linux-${ARCH}-${version}.tgz.sha256
+
+wget "$url"
 wget "${sha256_url}"
 
 # 校验文件是否完整
