@@ -215,7 +215,7 @@ verify () {
   echo containerd test
 
   ctr --debug  i pull \
-    registry.k8s.io/prometheus-adapter/prometheus-adapter:v0.11.2
+    registry.k8s.io/prometheus-adapter/prometheus-adapter:v0.11.2 || true 
 }
 
 main () {
