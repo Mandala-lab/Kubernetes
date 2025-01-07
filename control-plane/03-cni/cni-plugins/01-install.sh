@@ -47,26 +47,26 @@ if [[ -z $url ]];then
 fi
 
 echo "github_proxy_url: $github_proxy_url"
-echo "url: $url"
-
-if [[ -n "$github_proxy" && "$url" ]];then
+declare url=""
+if [[ -n "$github_proxy" ]];then
  echo "set proxy url"
  url="${github_proxy_url}${file_url}"
  sha256_url="${github_proxy_url}${sha256_url}"
 fi
 
 # 跟随重定向, 状态码为400就失败, 设置超时300秒, 使用远程文件的名称
+echo "url: ${url}"
 echo "file_url: ${file_url}"
 echo "sha256_url: ${sha256_url}"
 
 rm -rf cni-plugins-linux-${ARCH}-${version}.tgz
 rm -rf cni-plugins-linux-${ARCH}-${version}.tgz.sha256
 
-wget "$url"
+wget "${url}"
 wget "${sha256_url}"
 
 # 校验文件是否完整
-sha256sum -c cni-plugins-linux-${ARCH}-${version}.tgz{,.sha256}
+sha256sum -c cni-plugins-linux-${ARCH}-${version}.tgz.sha256
 
 mkdir -p /opt/cni/bin
 tar -xzvf cni-plugins-linux-${ARCH}-${version}.tgz -C /opt/cni/bin
