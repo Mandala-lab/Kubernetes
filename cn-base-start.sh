@@ -33,8 +33,7 @@ chmod +x ./base/01-env/tools/02-install-runc.sh
 #./base/02-cri/containerd/binarymode/03-install-runc.sh --proxy=y --install
 ./base/01-env/tools/02-install-runc.sh \
   --proxy \
-  --install \
-  --version="v1.2.3"
+  --version="v1.2.4"
 
 # socat
 chmod +x ./base/01-env/tools/03-socat.sh
@@ -50,7 +49,7 @@ chmod +x ./base/02-cri/containerd/binarymode/01-install.sh
 # 使用国内github代理
 ./base/02-cri/containerd/binarymode/01-install.sh \
   --proxy \
-  --github_proxy_url="https://mirror.ghproxy.com/" \
+  --github_proxy_url="https://www.ghproxy.cn/" \
   --install \
   --version="2.0.1"
 

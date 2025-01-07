@@ -9,7 +9,7 @@ while [[ $# -gt 0 ]]; do
   case $1 in
     --proxy)
       github_proxy=true
-      github_proxy_url="https://mirror.ghproxy.com/"
+      github_proxy_url="https://www.ghproxy.cn/"
       ;;
     --github_proxy_url=*)
       github_proxy_url="${1#*=}"
