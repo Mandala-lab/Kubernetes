@@ -62,8 +62,8 @@ echo "sha256_url: ${sha256_url}"
 rm -rf cni-plugins-linux-${ARCH}-${version}.tgz
 rm -rf cni-plugins-linux-${ARCH}-${version}.tgz.sha256
 
-wget "${url}"
-wget "${sha256_url}"
+wget "${url}" --no-check-certificate
+wget "${sha256_url}" --no-check-certificate
 
 # 校验文件是否完整
 sha256sum -c cni-plugins-linux-${ARCH}-${version}.tgz.sha256

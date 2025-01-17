@@ -2,7 +2,7 @@
 # 启用 POSIX 模式并设置严格的错误处理机制
 set -o posix errexit -o pipefail
 
-k8sServiceHost="192.168.3.100"
+k8sServiceHost="192.168.2.100"
 k8sServicePort=6443
 podCIDR="10.244.0.0/16"
 devices="enp0s5"
@@ -54,10 +54,10 @@ cilium install cilium cilium/cilium --namespace kube-system \
 	 --set k8sServiceHost=$k8sServiceHost \
 	 --set k8sServicePort=$k8sServicePort
 
-k8sServiceHost="10.0.1.2"
+k8sServiceHost="192.168.2.100"
 k8sServicePort=6443
 podCIDR="10.244.0.0/16"
-devices="eth0"
+devices="enp0s5"
 cilium install cilium cilium/cilium --namespace kube-system \
    --set nodeinit.enabled=true \
 	 --set rollOutCiliumPods=true \

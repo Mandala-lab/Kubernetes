@@ -1,6 +1,6 @@
 #!/bin/bash
 
-#CILIUM_CLI_VERSION=$(curl -s curl --connect-timeout 10 https://mirror.ghproxy.com/https://github.com/https://raw.githubusercontent.com/cilium/cilium-cli/main/stable.txt)
+#CILIUM_CLI_VERSION=$(curl -s curl --connect-timeout 10 https://www.ghproxy.cn/https://github.com/https://raw.githubusercontent.com/cilium/cilium-cli/main/stable.txt)
 CILIUM_CLI_VERSION=$(curl -s curl --connect-timeout 10 https://raw.githubusercontent.com/cilium/cilium-cli/main/stable.txt)
 #CILIUM_CLI_VERSION=v0.16.22
 CLI_ARCH=""
@@ -14,7 +14,7 @@ elif [ "$machine" = "x86_64" ]; then
 else
     echo "请手动定义你的发行版的架构"
 fi
-#wget -t 2 -T 240 -N -S https://mirror.ghproxy.com/https://github.com/cilium/cilium-cli/releases/download/"${CILIUM_CLI_VERSION}"/cilium-linux-${CLI_ARCH}.tar.gz{,.sha256sum}
+#wget -t 2 -T 240 -N -S https://www.ghproxy.cn/https://github.com/cilium/cilium-cli/releases/download/"${CILIUM_CLI_VERSION}"/cilium-linux-${CLI_ARCH}.tar.gz{,.sha256sum}
 wget -t 2 -T 240 -N -S https://github.com/cilium/cilium-cli/releases/download/"${CILIUM_CLI_VERSION}"/cilium-linux-${CLI_ARCH}.tar.gz{,.sha256sum}
 sha256sum --check cilium-linux-${CLI_ARCH}.tar.gz.sha256sum
 sudo tar xzvfC cilium-linux-${CLI_ARCH}.tar.gz /usr/local/bin

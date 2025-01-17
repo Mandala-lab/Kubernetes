@@ -40,20 +40,9 @@ set_proxy_url () {
   mkdir -p /etc/containerd/certs.d/docker.io
   cat > /etc/containerd/certs.d/docker.io/hosts.toml << EOF
 server = "https://docker.io"
-[host."https://dhub.kubesre.xyz"]
+[host."https://646f636b6572.boown.com"]
 capabilities = ["pull", "resolve"]
 
-[host."https://dockerproxy.com"]
-  capabilities = ["pull", "resolve"]
-
-[host."https://docker.m.daocloud.io"]
-  capabilities = ["pull", "resolve"]
-
-[host."https://registry.docker-cn.com"]
-  capabilities = ["pull", "resolve"]
-
-[host."http://hub-mirror.c.163.com"]
-  capabilities = ["pull", "resolve"]
 EOF
 
   # registry.k8s.io镜像加速

@@ -2,11 +2,6 @@
 # 启用 POSIX 模式并设置严格的错误处理机制
 set -e -o posix -o pipefail
 
-rm -rf $HOME/.kube
-mkdir -p $HOME/.kube
-sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
-sudo chown $(id -u):$(id -g) $HOME/.kube/config
-
 # shell自动完成
 apt-get install bash-completion
 ##or

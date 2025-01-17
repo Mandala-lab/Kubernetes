@@ -16,6 +16,7 @@ cat /boot/config-$(uname -r) | grep CONFIG_CGROUPS
 cat /boot/config-$(uname -r) | grep CONFIG_CGROUP_BPF
 cat /boot/config-$(uname -r) | grep CONFIG_PERF_EVENTS
 cat /boot/config-$(uname -r) | grep CONFIG_SCHEDSTATS
+cat /boot/config-$(uname -r) | grep CONFIG_NET_SCH_FQ
 
 # 为了正确启用 eBPF 功能，必须启用以下内核配置选项。分发内核通常就是这种情况
 # 当一个选项可以构建为模块或静态链接时，任何一个选择都是有效的
