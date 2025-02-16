@@ -3,7 +3,7 @@
 set -e -o posix -o pipefail
 
 # 定义可用的版本列表
-kubernetes_versions=("v1.32" "v1.31" "v1.30" "v1.29")
+kubernetes_versions=(""${kubernetes_versions[$current_selection]}"" "v1.31" "v1.30" "v1.29")
 current_selection=0  # 当前选中的索引
 
 echo "目前由于kubernetes官方变更了仓库的存储路径以及使用方式，旧版 kubernetes 源只更新到 1.28 部分版本，本人懒,不另写旧源的方法"
@@ -75,22 +75,11 @@ select_kubernetes_version() {
     fi
 }
 
-check_dir() {
-  echo "判断 /etc/apt/keyrings 目录是否存在"
-  if [[ ! -e /etc/apt/keyrings || ! -d /etc/apt/keyrings ]]; then
-    echo "目录不存在, 创建"
-    sudo mkdir -p -m 755 /etc/apt/keyrings
-  else
-    echo "目录已存在, 删除"
-    rm -rf /etc/apt/keyrings/kubernetes-apt-keyring.gpg
-  fi
-}
-
 add_kubernetes_apt() {
-  echo "添加 Kubernetes apt 仓库。 请注意，此仓库仅包含适用于 Kubernetes 1.31 的软件包； 对于其他 Kubernetes 次要版本，则需要更改 URL 中的 Kubernetes 次要版本以匹配你所需的次要版本 （你还应该检查正在阅读的安装文档是否为你计划安装的 Kubernetes 版本的文档）"
+  # 如果 `/etc/apt/keyrings` 目录不存在，则应在 curl 命令之前创建它，请阅读下面的注释。
+  # sudo mkdir -p -m 755 /etc/apt/keyrings
   curl -fsSL https://pkgs.k8s.io/core:/stable:/"${kubernetes_versions[$current_selection]}"/deb/Release.key | sudo gpg --dearmor -o /etc/apt/keyrings/kubernetes-apt-keyring.gpg
-  echo "deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/${kubernetes_versions[$current_selection]}/deb/ /" | sudo tee /etc/apt/sources.list.d/kubernetes.list
-  cat /etc/apt/sources.list.d/kubernetes.list
+  sudo chmod 644 /etc/apt/keyrings/kubernetes-apt-keyring.gpg # allow unprivileged APT programs to read this keyring
 }
 
 update_apt() {
