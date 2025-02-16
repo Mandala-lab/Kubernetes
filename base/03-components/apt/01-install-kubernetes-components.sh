@@ -8,6 +8,17 @@ current_selection=0  # 当前选中的索引
 
 echo "目前由于kubernetes官方变更了仓库的存储路径以及使用方式，旧版 kubernetes 源只更新到 1.28 部分版本，本人懒,不另写旧源的方法"
 
+check_dir() {
+  echo "判断 /etc/apt/keyrings 目录是否存在"
+  if [[ ! -e /etc/apt/keyrings || ! -d /etc/apt/keyrings ]]; then
+    echo "目录不存在, 创建"
+    sudo mkdir -p -m 755 /etc/apt/keyrings
+  else
+    echo "目录已存在, 删除"
+    rm -rf /etc/apt/keyrings/kubernetes-apt-keyring.gpg
+  fi
+}
+
 # 打印菜单
 print_menu() {
     clear
@@ -70,7 +81,8 @@ check_dir() {
     echo "目录不存在, 创建"
     sudo mkdir -p -m 755 /etc/apt/keyrings
   else
-    echo "目录已存在"
+    echo "目录已存在, 删除"
+    rm -rf /etc/apt/keyrings/kubernetes-apt-keyring.gpg
   fi
 }
 
@@ -93,8 +105,8 @@ lock_kubernetes_version() {
 }
 
 main() {
-  select_kubernetes_version
   check_dir
+  select_kubernetes_version
   add_kubernetes_apt
   update_apt
   lock_kubernetes_version

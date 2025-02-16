@@ -97,8 +97,8 @@ lock_kubernetes_version() {
 }
 
 main() {
-  select_kubernetes_version
   check_dir
+  select_kubernetes_version
   add_kubernetes_apt
   update_apt
   lock_kubernetes_version
