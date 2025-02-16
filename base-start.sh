@@ -62,11 +62,12 @@ chmod +x ./base/02-cri/containerd/binarymode/02-config.sh
 # CNI二进制文件, 大多数的环境都需要, 但少数的CNI插件不需要
 chmod +x ./control-plane/03-cni/cni-plugins/01-install.sh
 ./control-plane/03-cni/cni-plugins/01-install.sh \
-  --version="v1.6.1"
+  --version="v1.6.2"
 
 # 全部节点安装kubernetes组件
 chmod +x ./base/03-components/apt/01-install-kubernetes-components.sh
-./base/03-components/apt/01-install-kubernetes-components.sh
+./base/03-components/apt/01-install-kubernetes-components.sh \
+
 
 # 控制平面安装kubectl组件
 chmod +x ./control-plane/01-kubectl/apt/01-install-control-plane-components.sh

@@ -6,11 +6,69 @@ set -e -o posix -o pipefail
 kubernetes_version=("v1.32" "v1.31" "v1.30" "v1.29")
 current_selection=0  # 当前选中的索引
 
+# 打印菜单
+print_menu() {
+    clear
+    echo "请选择一个 Kubernetes 版本 (使用上下箭头选择，按 Enter 确认)："
+    for i in "${!kubernetes_versions[@]}"; do
+        if [ "$i" -eq "$current_selection" ]; then
+            echo -e "\e[7m> ${kubernetes_versions[$i]}\e[0m"  # 高亮显示当前选中的选项
+        else
+            echo "  ${kubernetes_versions[$i]}"
+        fi
+    done
+}
+
+# 处理用户输入
+handle_input() {
+    read -rsn1 key  # 读取一个字符
+
+    case "$key" in
+        A)  # 上箭头
+            if [ "$current_selection" -gt 0 ]; then
+                ((current_selection--))
+            fi
+            ;;
+        B)  # 下箭头
+            if [ "$current_selection" -lt $((${#kubernetes_versions[@]} - 1)) ]; then
+                ((current_selection++))
+            fi
+            ;;
+        "")  # Enter 键
+            selected_version="${kubernetes_versions[$current_selection]}"
+            return 0
+            ;;
+        *)  # 其他键
+            ;;
+    esac
+
+    return 1
+}
+# 主循环
+select_kubernetes_version() {
+    while true; do
+        print_menu
+        if handle_input; then
+            break
+        fi
+    done
+
+    # 输出用户选择的版本
+    if [ -n "$selected_version" ]; then
+        echo "你选择了 Kubernetes 版本: $selected_version"
+    else
+        echo "没有选择任何版本，退出。"
+        exit 1
+    fi
+}
+
 check_dir() {
-  echo "判断/etc/apt/keyrings命令是否存在"
-  if [[ -e /etc/apt/keyrings && -d /etc/apt/keyrings ]]; then
-    echo "目录不存在,创建"
+  echo "判断 /etc/apt/keyrings 目录是否存在"
+  if [[ ! -e /etc/apt/keyrings || ! -d /etc/apt/keyrings ]]; then
+    echo "目录不存在, 创建"
     sudo mkdir -p -m 755 /etc/apt/keyrings
+  else
+    echo "目录已存在"
   fi
 }
 
@@ -33,10 +91,15 @@ lock_kubernetes_version() {
 }
 
 main() {
+  select_kubernetes_version
   check_dir
   add_kubernetes_apt
   update_apt
   lock_kubernetes_version
+
+  echo "Kubernetes 安装完成，客户端版本如下："
+  kubeadm version
+  kubelet --version
 }
 
 main "@"

@@ -1010,7 +1010,7 @@ kubectl -n kube-system exec ds/cilium -- cilium service list
 ```
 
 ```shell
-cat /var/run/cilium/cilium-cni.log
+cat /var/run/cilium/cilium-cni.helper
 ```
 
 ### 检查/etc/cni/net.d/05-cilium.conflist文件是否存在

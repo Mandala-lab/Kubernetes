@@ -561,9 +561,9 @@ cni:
   # agent downtime.
   exclusive: true
 
-  # -- Configure the log file for CNI logging with retention policy of 7 days.
+  # -- Configure the helper file for CNI logging with retention policy of 7 days.
   # Disable CNI file logging by setting this field to empty explicitly.
-  logFile: /var/run/cilium/cilium-cni.log
+  logFile: /var/run/cilium/cilium-cni.helper
 
   # -- Skip writing of the CNI configuration. This can be used if
   # writing of the CNI configuration is performed by external automation.
@@ -867,7 +867,7 @@ endpointHealthChecking:
   enabled: true
 
 # -- Enable endpoint status.
-# Status can be: policy, health, controllers, log and / or state. For 2 or more options use a space.
+# Status can be: policy, health, controllers, helper and / or state. For 2 or more options use a space.
 endpointStatus:
   enabled: false
   status: ""
@@ -1622,7 +1622,7 @@ hubble:
     # Static exporter is bound to agent lifecycle.
     static:
       enabled: false
-      filePath: /var/run/cilium/hubble/events.log
+      filePath: /var/run/cilium/hubble/events.helper
       fieldMask: []
       # - time
       # - source
@@ -1649,9 +1649,9 @@ hubble:
           fieldMask: []
           includeFilters: []
           excludeFilters: []
-          filePath: "/var/run/cilium/hubble/events.log"
+          filePath: "/var/run/cilium/hubble/events.helper"
         #- name: "test002"
-        #  filePath: "/var/log/network/flow-log/pa/test002.log"
+        #  filePath: "/var/helper/network/flow-helper/pa/test002.helper"
         #  fieldMask: ["source.namespace", "source.pod_name", "destination.namespace", "destination.pod_name", "verdict"]
         #  includeFilters:
         #  - source_pod: ["default/"]
@@ -2041,10 +2041,10 @@ envoy:
   # -- Enable Envoy Proxy in standalone DaemonSet.
   enabled: false
 
-  log:
-    # -- The format string to use for laying out the log message metadata of Envoy.
+  helper:
+    # -- The format string to use for laying out the helper message metadata of Envoy.
     format: "[%Y-%m-%d %T.%e][%t][%l][%n] [%g:%#] %v"
-    # -- Path to a separate Envoy log file, if any. Defaults to /dev/stdout.
+    # -- Path to a separate Envoy helper file, if any. Defaults to /dev/stdout.
     path: ""
 
   # -- Time in seconds after which a TCP connection attempt times out
