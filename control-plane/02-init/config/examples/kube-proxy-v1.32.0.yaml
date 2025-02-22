@@ -44,7 +44,7 @@ etcd:
     dataDir: /var/lib/etcd
 imageRepository: registry.k8s.io
 kind: ClusterConfiguration
-kubernetesVersion: 1.32.0
+kubernetesVersion: 1.32.2
 networking:
   dnsDomain: cluster.local
   serviceSubnet: 192.168.0.0/16
